@@ -9,4 +9,10 @@ public final class Git {
             $0(.failure(.noRepository))
         }
     }
+    
+    public func create(_ url: URL) -> Future<Repository, Error> {
+        .init { _ in
+            
+        }
+    }
 }
