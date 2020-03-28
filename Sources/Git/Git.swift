@@ -42,7 +42,7 @@ public final class Git {
     }
     
     private func open(at: URL) throws -> Repository {
-        guard File.directory(at.refs), File.directory(at.objects) else { throw Fail.Repository.noRepository }
+        guard File.directory(at.refs), File.directory(at.objects) else { throw Fail.Repository.none }
         return .init(at)
     }
     
