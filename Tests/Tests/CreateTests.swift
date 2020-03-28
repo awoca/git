@@ -8,7 +8,6 @@ final class CreateTests: Tests {
         let root = url.appendingPathComponent(".git")
         let refs = root.appendingPathComponent("refs")
         let objects = root.appendingPathComponent("objects")
-        let head = root.appendingPathComponent("HEAD")
         XCTAssertFalse(FileManager.default.fileExists(atPath: root.path))
         
         git.create(url).sink(receiveCompletion: {
@@ -32,14 +31,7 @@ final class CreateTests: Tests {
             XCTAssertTrue(FileManager.default.fileExists(atPath: objects.path, isDirectory: &dir))
             XCTAssertTrue(dir.boolValue)
             
-            dir = false
-            XCTAssertTrue(FileManager.default.fileExists(atPath: head.path, isDirectory: &dir))
-            XCTAssertFalse(dir.boolValue)
-            
-            let data = try? Data(contentsOf: head)
-            XCTAssertNotNil(data)
-            
-            XCTAssertTrue(String(decoding: data ?? Data(), as: UTF8.self).contains("ref: refs/"))
+            XCTAssertTrue($0.branch is MasterBranch)
             
             expect.fulfill()
         }.store(in: &subs)

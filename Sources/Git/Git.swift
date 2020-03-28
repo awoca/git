@@ -28,20 +28,28 @@ public final class Git {
             self?.queue.async {
                 do {
                     try self?.create(at: url)
+                    guard let repository = try self?.open(at: url) else { return }
+                    DispatchQueue.main.async {
+                        promise(.success(repository))
+                    }
                 } catch {
-                    promise(.failure(error))
+                    DispatchQueue.main.async {
+                        promise(.failure(error))
+                    }
                 }
             }
         }
     }
     
     private func open(at: URL) throws -> Repository {
-        throw Fail.Repository.noRepository
+        guard File.directory(at.refs), File.directory(at.objects) else { throw Fail.Repository.noRepository }
+        return .init(at)
     }
     
     private func create(at: URL) throws {
-        let root = at.appendingPathComponent(".git")
-        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: false)
-        
+        try File.create(at.git)
+        try File.create(at.refs)
+        try File.create(at.objects)
+        _Branch.checkoutMaster(at)
     }
 }
