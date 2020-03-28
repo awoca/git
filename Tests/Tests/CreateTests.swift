@@ -4,6 +4,7 @@ import XCTest
 final class CreateTests: Tests {
     func testCreate() {
         let expect = expectation(description: "")
+        
         let root = url.appendingPathComponent(".git")
         let refs = root.appendingPathComponent("refs")
         let objects = root.appendingPathComponent("objects")
@@ -16,6 +17,7 @@ final class CreateTests: Tests {
             default: XCTFail()
             }
         }) {
+            XCTAssertEqual(.main, Thread.current)
             XCTAssertEqual(self.url, $0.url)
             
             var dir = ObjCBool(false)
@@ -40,6 +42,55 @@ final class CreateTests: Tests {
             XCTAssertTrue(String(decoding: data ?? Data(), as: UTF8.self).contains("ref: refs/"))
             
             expect.fulfill()
+        }.store(in: &subs)
+        
+        waitForExpectations(timeout: 1)
+    }
+    
+    func testCreateNoAccess() {
+        let expect = expectation(description: "")
+        
+        git.create(URL(fileURLWithPath: "/")).sink(receiveCompletion: {
+            XCTAssertEqual(.main, Thread.current)
+            switch $0 {
+            case .failure(_):
+                expect.fulfill()
+            default: XCTFail()
+            }
+        }) { _ in
+            XCTFail()
+        }.store(in: &subs)
+        
+        waitForExpectations(timeout: 1)
+    }
+    
+    func testCreateNonExistingDirectory() {
+        let expect = expectation(description: "")
+        
+        git.create(url.appendingPathComponent("hello")).sink(receiveCompletion: {
+            switch $0 {
+            case .failure(_):
+                expect.fulfill()
+            default: XCTFail()
+            }
+        }) { _ in
+            XCTFail()
+        }.store(in: &subs)
+        
+        waitForExpectations(timeout: 1)
+    }
+    
+    func testCreateRemoteUrl() {
+        let expect = expectation(description: "")
+        
+        git.create(URL(string: "https://avocado.com")!).sink(receiveCompletion: {
+            switch $0 {
+            case .failure(_):
+                expect.fulfill()
+            default: XCTFail()
+            }
+        }) { _ in
+            XCTFail()
         }.store(in: &subs)
         
         waitForExpectations(timeout: 1)
