@@ -2,6 +2,10 @@ import XCTest
 @testable import Git
 
 final class ContentTests: Tests {
+    func testEmpty() {
+        XCTAssertTrue(File.contents(url).isEmpty)
+    }
+    
     func testFile() {
         try! Data("hello world".utf8).write(to: url.appendingPathComponent("file.txt"))
         XCTAssertEqual("file.txt", File.contents(url).first)

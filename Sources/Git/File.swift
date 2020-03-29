@@ -11,16 +11,31 @@ final class File {
     }
     
     class func contents(_ url: URL) -> Set<String> {
-        FileManager.default.enumerator(atPath: url.path)!.reduce(into: ([], ignore(url))) {
-            for i in $0.1 {
-                guard ($1 as! String).contains(i) else { continue }
-                return
-            }
-            $0.0.insert($1 as! String)
-        }.0
+        FileManager.default.enumerator(atPath: url.path)!.reduce(into: Ignore(url)) {
+            $0.add($1 as! String)
+        }.cleared
+    }
+}
+
+private final class Ignore {
+    private(set) var cleared = Set<String>()
+    private let folders = ["/.git/"]
+    
+    init(_ url: URL) {
+        
     }
     
-    private class func ignore(_ url: URL) -> Set<String> {
-        [".git"]
+    func add(_ string: String) {
+        guard pass(folders: string) else { return }
+        cleared.insert(string)
+    }
+    
+    private func pass(folders string: String) -> Bool {
+        let compare = "/" + string + "/"
+        for folder in folders {
+            guard compare.contains(folder) else { continue }
+            return false
+        }
+        return true
     }
 }
