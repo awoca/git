@@ -7,6 +7,10 @@ public final class Status: Publisher, Subscription {
     var repository: Repository!
     private var sub: AnySubscriber<Report, Never>?
     
+    var index: [Indexed] {
+        []
+    }
+    
     public func receive<S>(subscriber: S) where S : Subscriber, Never == S.Failure, Report == S.Input {
         sub = .init(subscriber)
         subscriber.receive(subscription: self)

@@ -4,7 +4,7 @@ public protocol Report { }
 
 public struct Clean: Report { }
 
-public struct Changed: Report {
+public struct Changes: Report {
     public let items: Set<Item>
     
     public enum Status {
@@ -16,8 +16,8 @@ public struct Changed: Report {
     }
     
     public struct Item: Hashable {
-        let status: Status
-        let path: String
+        public let status: Status
+        public let path: String
         
         public func hash(into: inout Hasher) {
             into.combine(path)
