@@ -4,6 +4,7 @@ import Combine
 public final class Status: Publisher, Subscription {
     public typealias Output = Report
     public typealias Failure = Never
+    
     var repository: Repository!
     private var sub: AnySubscriber<Report, Never>?
     

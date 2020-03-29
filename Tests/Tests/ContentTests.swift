@@ -1,0 +1,23 @@
+import XCTest
+@testable import Git
+
+final class ContentTests: Tests {
+    func testFile() {
+        try! Data("hello world".utf8).write(to: url.appendingPathComponent("file.txt"))
+        XCTAssertEqual("file.txt", File.contents(url).first)
+    }
+    
+    func testDirectory() {
+        try! FileManager.default.createDirectory(at: url.appendingPathComponent("lorem"), withIntermediateDirectories: false)
+        XCTAssertEqual("lorem", File.contents(url).first)
+    }
+    
+    func testFileInSubdirectory() {
+        try! FileManager.default.createDirectory(at: url.appendingPathComponent("lorem"), withIntermediateDirectories: false)
+        try! Data("hello world".utf8).write(to: url.appendingPathComponent("fileA.txt"))
+        try! Data("world hello".utf8).write(to: url.appendingPathComponent("lorem/fileB.txt"))
+        let contents = File.contents(url)
+        XCTAssertTrue(contents.contains("fileA.txt"))
+        XCTAssertTrue(contents.contains("lorem/fileB.txt"))
+    }
+}

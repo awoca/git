@@ -10,7 +10,17 @@ final class File {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
     }
     
-    class func contents(_ url: URL) -> [String] {
-        FileManager.default.enumerator(at: url, includingPropertiesForKeys: nil)!.map { ($0 as! URL).resolvingSymlinksInPath().path }
+    class func contents(_ url: URL) -> Set<String> {
+        FileManager.default.enumerator(atPath: url.path)!.reduce(into: ([], ignore(url))) {
+            for i in $0.1 {
+                guard ($1 as! String).contains(i) else { continue }
+                return
+            }
+            $0.0.insert($1 as! String)
+        }.0
+    }
+    
+    private class func ignore(_ url: URL) -> Set<String> {
+        [".git"]
     }
 }
