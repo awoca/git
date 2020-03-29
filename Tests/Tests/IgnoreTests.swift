@@ -12,19 +12,38 @@ final class IgnoreTests: Tests {
     }
     
     func testMatchesGit() {
-        let shouldContain = [
+        let yes = [
             ".gita",
             "a.git",
             "halo/so.gita"]
-        shouldContain.forEach(create(_:))
+        yes.forEach(create(_:))
+        
         let contents = File.contents(self.url)
-        shouldContain.forEach {
+        
+        yes.forEach {
             XCTAssertTrue(contents.contains($0), $0)
         }
     }
     
     func testMatchesFolder() {
-        ignore([""])
+        ignore([
+            "avocado/",
+            "aguacate"])
+        let yes = [
+            "aguacate"]
+        let no = [
+            "avocado/something.txt"]
+        yes.forEach(create(_:))
+        no.forEach(create(_:))
+        
+        let contents = File.contents(self.url)
+        
+        yes.forEach {
+            XCTAssertTrue(contents.contains($0), $0)
+        }
+        no.forEach {
+            XCTAssertFalse(contents.contains($0), $0)
+        }
     }
     
     private func create(_ file: String) {
