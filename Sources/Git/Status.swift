@@ -1,23 +1,25 @@
 import Foundation
 import Combine
 
-public final class Status: Publisher {
+public final class Status: Publisher, Subscription {
     public typealias Output = Report
     public typealias Failure = Never
     var repository: Repository!
-    private var sub = Sub()
+    private var sub: AnySubscriber<Report, Never>?
     
     public func receive<S>(subscriber: S) where S : Subscriber, Never == S.Failure, Report == S.Input {
-        sub.subscriber = .init(.init(subscriber))
+        sub = .init(subscriber)
+        subscriber.receive(subscription: self)
+        send()
     }
-}
+    
+    public func request(_ demand: Subscribers.Demand) { }
 
-private final class Sub: Subscription {
-    var subscriber: AnySubscriber<Report, Never>?
+    public func cancel() {
+        sub = nil
+    }
     
-    func request(_ demand: Subscribers.Demand) { }
-    
-    func cancel() {
-        subscriber = nil
+    private func send() {
+        _ = sub?.receive(Clean())
     }
 }

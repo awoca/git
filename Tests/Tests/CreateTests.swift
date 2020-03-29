@@ -1,5 +1,5 @@
 import XCTest
-@testable import Git
+import Git
 
 final class CreateTests: Tests {
     func testCreate() {
