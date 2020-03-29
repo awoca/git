@@ -11,8 +11,9 @@ final class File {
     }
     
     class func contents(_ url: URL) -> Set<String> {
-        FileManager.default.enumerator(atPath: url.path)!.reduce(into: Ignore(url)) {
-            $0.add($1 as! String)
+        FileManager.default.enumerator(at: url, includingPropertiesForKeys: [], options: .producesRelativePathURLs)!.reduce(into: Ignore(url)) {
+            guard !($1 as! URL).hasDirectoryPath else { return }
+            $0.add(($1 as! URL).relativePath)
         }.cleared
     }
 }

@@ -11,7 +11,7 @@ final class IgnoreTests: Tests {
         waitForExpectations(timeout: 1)
     }
     
-    func testMatches() {
+    func testMatchesGit() {
         let shouldContain = [
             ".gita",
             "a.git",
@@ -23,10 +23,18 @@ final class IgnoreTests: Tests {
         }
     }
     
+    func testMatchesFolder() {
+        ignore([""])
+    }
+    
     private func create(_ file: String) {
         if file.contains("/") {
             try! FileManager.default.createDirectory(at: url.appendingPathComponent(file).deletingLastPathComponent(), withIntermediateDirectories: true)
         }
         try! Data().write(to: url.appendingPathComponent(file))
+    }
+    
+    private func ignore(_ list: [String]) {
+        try! Data(list.joined(separator: "\n").utf8).write(to: url.appendingPathComponent(".gitignore"))
     }
 }
