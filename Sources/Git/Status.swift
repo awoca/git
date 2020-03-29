@@ -24,6 +24,11 @@ public final class Status: Publisher, Subscription {
     }
     
     private func send() {
-        _ = sub?.receive(Clean())
+        let contents = File.contents(repository.url)
+        if contents.isEmpty {
+            _ = sub?.receive(Clean())
+        } else {
+            _ = sub?.receive(Changes(items: .init(contents.map { .init(status: .untracked, path: $0) })))
+        }
     }
 }
