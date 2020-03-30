@@ -17,26 +17,3 @@ final class File {
         }.cleared
     }
 }
-
-private final class Ignore {
-    private(set) var cleared = Set<String>()
-    private let folders = ["/.git/"]
-    
-    init(_ url: URL) {
-        
-    }
-    
-    func add(_ string: String) {
-        guard pass(folders: string) else { return }
-        cleared.insert(string)
-    }
-    
-    private func pass(folders string: String) -> Bool {
-        let compare = "/" + string + "/"
-        for folder in folders {
-            guard compare.contains(folder) else { continue }
-            return false
-        }
-        return true
-    }
-}

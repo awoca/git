@@ -11,39 +11,60 @@ final class IgnoreTests: Tests {
         waitForExpectations(timeout: 1)
     }
     
-    func testMatchesGit() {
+    func testGit() {
         let yes = [
             ".gita",
             "a.git",
             "halo/so.gita"]
         yes.forEach(create(_:))
-        
-        let contents = File.contents(self.url)
-        
-        yes.forEach {
-            XCTAssertTrue(contents.contains($0), $0)
-        }
+        let contents = File.contents(url)
+        XCTAssertEqual(3, contents.count)
+        yes.forEach { XCTAssertTrue(contents.contains($0), $0) }
     }
     
-    func testMatchesFolder() {
-        ignore([
-            "avocado/",
-            "aguacate"])
-        let yes = [
-            "aguacate"]
+    func testFolder() {
+        ignore(["avocado/"])
+        let yes = ["some/avocado"]
         let no = [
-            "avocado/something.txt"]
+            "avocado/something.txt",
+            "hello/world/avocado/file.txt"]
         yes.forEach(create(_:))
         no.forEach(create(_:))
-        
-        let contents = File.contents(self.url)
-        
-        yes.forEach {
-            XCTAssertTrue(contents.contains($0), $0)
-        }
-        no.forEach {
-            XCTAssertFalse(contents.contains($0), $0)
-        }
+        let contents = File.contents(url)
+        XCTAssertEqual(2, contents.count)
+        yes.forEach { XCTAssertTrue(contents.contains($0), $0) }
+        no.forEach { XCTAssertFalse(contents.contains($0), $0) }
+    }
+    
+    func testRelative() {
+        ignore(["/avocado"])
+        let yes = [
+            "some/avocado/hello.txt",
+            "avocado.txt"]
+        let no = ["avocado/something.txt"]
+        yes.forEach(create(_:))
+        no.forEach(create(_:))
+        let contents = File.contents(url)
+        XCTAssertEqual(3, contents.count)
+        yes.forEach { XCTAssertTrue(contents.contains($0), $0) }
+        no.forEach { XCTAssertFalse(contents.contains($0), $0) }
+    }
+    
+    func testName() {
+        ignore(["file"])
+        let yes = [
+            "some/file.txt",
+            "file.txt"]
+        let no = [
+            "file/something.txt",
+            "avocado/file/something.txt",
+            "avocado/something/file"]
+        yes.forEach(create(_:))
+        no.forEach(create(_:))
+        let contents = File.contents(url)
+        XCTAssertEqual(3, contents.count)
+        yes.forEach { XCTAssertTrue(contents.contains($0), $0) }
+        no.forEach { XCTAssertFalse(contents.contains($0), $0) }
     }
     
     private func create(_ file: String) {
