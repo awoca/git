@@ -67,6 +67,39 @@ final class IgnoreTests: Tests {
         no.forEach { XCTAssertFalse(contents.contains($0), $0) }
     }
     
+    func testTwoAsterisksLeading() {
+        ignore(["**/file"])
+        let yes = [
+            "some/file.txt",
+            "file.txt"]
+        let no = [
+            "file/something.txt",
+            "avocado/file/something.txt",
+            "avocado/something/file"]
+        yes.forEach(create(_:))
+        no.forEach(create(_:))
+        let contents = File.contents(url)
+        XCTAssertEqual(3, contents.count)
+        yes.forEach { XCTAssertTrue(contents.contains($0), $0) }
+        no.forEach { XCTAssertFalse(contents.contains($0), $0) }
+    }
+    
+    func testTwoAsterisksTrailing() {
+        ignore(["file/**"])
+        let yes = [
+            "some/file",
+            "alpha/file/some"]
+        let no = [
+            "file/some",
+            "file/other"]
+        yes.forEach(create(_:))
+        no.forEach(create(_:))
+        let contents = File.contents(url)
+        XCTAssertEqual(3, contents.count)
+        yes.forEach { XCTAssertTrue(contents.contains($0), $0) }
+        no.forEach { XCTAssertFalse(contents.contains($0), $0) }
+    }
+    
     private func create(_ file: String) {
         if file.contains("/") {
             try! FileManager.default.createDirectory(at: url.appendingPathComponent(file).deletingLastPathComponent(), withIntermediateDirectories: true)

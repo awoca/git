@@ -9,7 +9,11 @@ final class Ignore {
         var relatives = Relatives()
         var names = Names()
         try? String(decoding: Data(contentsOf: url.ignore), as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines).components(separatedBy: "\n").forEach {
-            if $0.hasSuffix("/") {
+            if $0.hasPrefix("**/") {
+                names.rules.append(.init($0.dropFirst(3)))
+            } else if $0.hasSuffix("/**") {
+                relatives.rules.append($0.hasPrefix("/") ? .init($0.dropFirst().dropLast(3)) : .init($0.dropLast(3)))
+            } else if $0.hasSuffix("/") {
                 folders.rules.append(($0.hasPrefix("/") ? "" : "/") + $0)
             } else {
                 if $0.contains("/") {
