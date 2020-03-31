@@ -8,11 +8,18 @@ final class Ignore {
         var folders = Folders()
         var relatives = Relatives()
         var names = Names()
+        var leadingStar = LeadingStar()
+        var trailingStar = TrailingStar()
+        
         try? String(decoding: Data(contentsOf: url.ignore), as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines).components(separatedBy: "\n").forEach {
             if $0.hasPrefix("**/") {
                 names.rules.append(.init($0.dropFirst(3)))
             } else if $0.hasSuffix("/**") {
                 relatives.rules.append($0.hasPrefix("/") ? .init($0.dropFirst().dropLast(3)) : .init($0.dropLast(3)))
+            } else if $0.hasPrefix("*") {
+                leadingStar.rules.append(.init($0.dropFirst()))
+            } else if $0.hasSuffix("*") {
+                trailingStar.rules.append(.init($0.dropLast()))
             } else if $0.hasSuffix("/") {
                 folders.rules.append(($0.hasPrefix("/") ? "" : "/") + $0)
             } else {
@@ -23,7 +30,7 @@ final class Ignore {
                 }
             }
         }
-        commands = [folders, relatives, names]
+        commands = [folders, relatives, names, leadingStar, trailingStar]
     }
     
     func add(_ string: String) {
@@ -79,6 +86,34 @@ private struct Names: Command {
         for component in string.components(separatedBy: "/") {
             guard rules.contains(component) else { continue }
             return false
+        }
+        return true
+    }
+}
+
+private struct LeadingStar: Command {
+    var rules = [String]()
+    
+    func validate(_ string: String) -> Bool {
+        for component in string.components(separatedBy: "/") {
+            for rule in rules {
+                guard component.hasSuffix(rule) else { continue }
+                return false
+            }
+        }
+        return true
+    }
+}
+
+private struct TrailingStar: Command {
+    var rules = [String]()
+    
+    func validate(_ string: String) -> Bool {
+        for component in string.components(separatedBy: "/") {
+            for rule in rules {
+                guard component.hasPrefix(rule) else { continue }
+                return false
+            }
         }
         return true
     }
