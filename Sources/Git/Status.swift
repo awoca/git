@@ -15,7 +15,7 @@ public final class Status: Publisher, Subscription {
     public func receive<S>(subscriber: S) where S : Subscriber, Never == S.Failure, Report == S.Input {
         sub = .init(subscriber)
         subscriber.receive(subscription: self)
-        send()
+        start()
     }
     
     public func request(_ demand: Subscribers.Demand) { }
@@ -26,11 +26,14 @@ public final class Status: Publisher, Subscription {
     
     var stream: FSEventStreamRef?
     
-    func start() {
+    private func start() {
         var context = FSEventStreamContext(version: 0, info: Unmanaged.passUnretained(self).toOpaque(), retain: nil, release: nil, copyDescription: nil)
-        stream = FSEventStreamCreate(kCFAllocatorDefault, eventCallback, &context, [repository.url.path] as CFArray, FSEventStreamEventId(kFSEventStreamEventIdSinceNow), 0, UInt32(kFSEventStreamCreateFlagUseCFTypes | kFSEventStreamCreateFlagFileEvents))
-        FSEventStreamSetDispatchQueue(stream!, repository.queue)
+        stream = FSEventStreamCreate(kCFAllocatorDefault, { _, context, _, _, _, _ in
+            Unmanaged<Status>.fromOpaque(context!).takeUnretainedValue().send()
+        }, &context, [repository.url.path] as CFArray, .init(kFSEventStreamEventIdSinceNow), 0.01, .init(kFSEventStreamCreateFlagNone))
+        FSEventStreamSetDispatchQueue(stream!, DispatchQueue.main)
         FSEventStreamStart(stream!)
+        FSEventStreamFlushAsync(stream!)
     }
     
     private func send() {
@@ -40,23 +43,5 @@ public final class Status: Publisher, Subscription {
         } else {
             _ = sub?.receive(Changes(items: .init(contents.map { .init(status: .untracked, path: $0) })))
         }
-    }
-    
-    let eventCallback: FSEventStreamCallback = {(
-       stream: ConstFSEventStreamRef,
-       contextInfo: UnsafeMutableRawPointer?,
-       numEvents: Int,
-       eventPaths: UnsafeMutableRawPointer,
-       eventFlags: UnsafePointer<FSEventStreamEventFlags>,
-       eventIds: UnsafePointer<FSEventStreamEventId>
-       ) in
-        Swift.print("---------------------------- \(numEvents)")
-        Swift.print(Unmanaged<CFArray>.fromOpaque(eventPaths).takeUnretainedValue() as! [String])
-        Swift.print("----------------------------")
-//       let fileSystemWatcher = Unmanaged<FileWatcher>.fromOpaque(contextInfo!).takeUnretainedValue()
-//       let paths = Unmanaged<CFArray>.fromOpaque(eventPaths).takeUnretainedValue() as! [String]
-//       (0..<numEvents).indices.forEach { index in
-//          fileSystemWatcher.callback?(FileWatcherEvent(eventIds[index], paths[index], eventFlags[index]))
-//       }
     }
 }

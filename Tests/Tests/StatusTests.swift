@@ -9,6 +9,7 @@ final class StatusTests: Tests {
                 XCTAssertEqual(.main, Thread.current)
                 XCTAssertTrue($0 is Clean)
                 expect.fulfill()
+                self.subs = []
             }.store(in: &self.subs)
         }.store(in: &subs)
         waitForExpectations(timeout: 1)
@@ -23,6 +24,7 @@ final class StatusTests: Tests {
                 XCTAssertEqual(.untracked, changes?.items.first?.status)
                 XCTAssertEqual("file.txt", changes?.items.first?.path)
                 expect.fulfill()
+                self.subs = []
             }.store(in: &self.subs)
         }.store(in: &subs)
         waitForExpectations(timeout: 1)
@@ -30,17 +32,17 @@ final class StatusTests: Tests {
     
     func testNewFileAfterCreate() {
         let expect = expectation(description: "")
-        expect.expectedFulfillmentCount = 2
         git.create(url).sink(receiveCompletion: { _ in }) { repository in
             repository.status.sink {
                 if let changes = $0 as? Changes {
                     XCTAssertEqual(.untracked, changes.items.first?.status)
                     XCTAssertEqual("file.txt", changes.items.first?.path)
+                    expect.fulfill()
+                    self.subs = []
                 }
-                expect.fulfill()
             }.store(in: &self.subs)
-//            try! Data("hello world".utf8).write(to: self.url.appendingPathComponent("file.txt"))
+            try! Data("hello world".utf8).write(to: repository.url.appendingPathComponent("file.txt"))
         }.store(in: &subs)
-        waitForExpectations(timeout: 5)
+        waitForExpectations(timeout: 1)
     }
 }

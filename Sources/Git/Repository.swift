@@ -9,6 +9,5 @@ public final class Repository {
     init(_ url: URL) {
         self.url = url
         status.repository = self
-        status.start()
     }
 }
