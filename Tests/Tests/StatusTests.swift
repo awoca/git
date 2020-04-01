@@ -4,8 +4,9 @@ import Git
 final class StatusTests: Tests {
     func testClean() {
         let expect = expectation(description: "")
-        git.create(url).sink(receiveCompletion: { _ in }) { repository in
-            repository.status.sink {
+        git.create(url).sink(receiveCompletion: { _ in }) {
+            self.repository = $0
+            self.repository.status.sink {
                 XCTAssertEqual(.main, Thread.current)
                 XCTAssertTrue($0 is Clean)
                 expect.fulfill()
@@ -18,8 +19,9 @@ final class StatusTests: Tests {
     func testNewFileBeforeCreate() {
         let expect = expectation(description: "")
         try! Data("hello world".utf8).write(to: url.appendingPathComponent("file.txt"))
-        git.create(url).sink(receiveCompletion: { _ in }) { repository in
-            repository.status.sink {
+        git.create(url).sink(receiveCompletion: { _ in }) {
+            self.repository = $0
+            self.repository.status.sink {
                 let changes = $0 as? Changes
                 XCTAssertEqual(.untracked, changes?.items.first?.status)
                 XCTAssertEqual("file.txt", changes?.items.first?.path)
@@ -32,8 +34,9 @@ final class StatusTests: Tests {
     
     func testNewFileAfterCreate() {
         let expect = expectation(description: "")
-        git.create(url).sink(receiveCompletion: { _ in }) { repository in
-            repository.status.sink {
+        git.create(url).sink(receiveCompletion: { _ in }) {
+            self.repository = $0
+            self.repository.status.sink {
                 if let changes = $0 as? Changes {
                     XCTAssertEqual(.untracked, changes.items.first?.status)
                     XCTAssertEqual("file.txt", changes.items.first?.path)
@@ -41,7 +44,7 @@ final class StatusTests: Tests {
                     self.subs = []
                 }
             }.store(in: &self.subs)
-            try! Data("hello world".utf8).write(to: repository.url.appendingPathComponent("file.txt"))
+            try! Data("hello world".utf8).write(to: self.url.appendingPathComponent("file.txt"))
         }.store(in: &subs)
         waitForExpectations(timeout: 1)
     }
