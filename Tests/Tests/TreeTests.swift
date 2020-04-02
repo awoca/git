@@ -3,10 +3,13 @@ import XCTest
 
 final class TreeTests: Tests {
     func testEmpty() {
+        XCTAssertTrue(Tree(url).items.isEmpty)
+    }
+    
+    func testNewRepository() {
         let expect = expectation(description: "")
-        git.create(url).sink(receiveCompletion: { _ in }) {
-            self.repository = $0
-            XCTAssertTrue(self.repository.status.tree.items.isEmpty)
+        git.create(url).sink(receiveCompletion: { _ in }) { _ in
+            XCTAssertTrue(Tree(self.url).items.isEmpty)
             expect.fulfill()
         }.store(in: &subs)
         waitForExpectations(timeout: 1)

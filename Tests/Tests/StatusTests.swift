@@ -2,6 +2,8 @@ import XCTest
 import Git
 
 final class StatusTests: Tests {
+    var repository: Repository!
+    
     func testClean() {
         let expect = expectation(description: "")
         git.create(url).sink(receiveCompletion: { _ in }) {

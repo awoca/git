@@ -1,13 +1,11 @@
 import Foundation
 
 struct Tree {
-    static func make(_ repository: Repository, path: String) -> Tree {
-        .init()
-    }
-    
     var items = [Item]()
     
-    private init() { }
+    init(_ url: URL) {
+        
+    }
     
     struct Item {
         let hash: String

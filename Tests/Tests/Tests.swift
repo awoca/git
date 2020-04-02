@@ -3,7 +3,6 @@ import Combine
 @testable import Git
 
 class Tests: XCTestCase {
-    var repository: Repository!
     var subs = Set<AnyCancellable>()
     private(set) var git: Git!
     private(set) var url: URL!

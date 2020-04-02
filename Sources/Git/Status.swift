@@ -13,10 +13,6 @@ public final class Status: Publisher, Subscription {
         []
     }
     
-    var tree: Tree {
-        .make(repository, path: "")
-    }
-    
     deinit {
         stop()
     }
