@@ -1,5 +1,5 @@
-import CryptoKit
 import Foundation
+import CryptoKit
 
 final class Hash {
     class func file(_ url: URL) -> Pack {
