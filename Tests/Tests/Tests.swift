@@ -1,6 +1,6 @@
 import XCTest
 import Combine
-@testable import Git
+import Git
 
 class Tests: XCTestCase {
     var subs = Set<AnyCancellable>()

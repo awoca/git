@@ -1,22 +1,38 @@
 import Foundation
 
 struct Tree {
+    static func scan(_ url: URL) -> Tree {
+        var tree = Tree()
+        File.contents(url).forEach {
+            tree.avoid.insert(.init(.blob, .init(""), $0))
+        }
+        return tree
+    }
+    
     var avoid = Set<Item>()
     var save = Set<Item>()
     
-    init(_ url: URL) {
+    private init() {
         
     }
     
     struct Item: Hashable {
-        let hash: String
-        let name: String
         let category: Category
+        let id: Id
+        let name: String
         
-        init(_ hash: String, _ name: String, _ category: Category) {
-            self.hash = hash
-            self.name = name
+        init(_ category: Category, _ id: Id, _ name: String) {
             self.category = category
+            self.id = id
+            self.name = name
+        }
+        
+        func hash(into: inout Hasher) {
+            into.combine(id)
+        }
+        
+        static func == (lhs: Self, rhs: Self) -> Bool {
+            lhs.id == rhs.id
         }
     }
     
