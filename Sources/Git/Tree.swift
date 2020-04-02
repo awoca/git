@@ -1,20 +1,21 @@
 import Foundation
 
 struct Tree {
-    var items = [Item]()
+    var avoid = Set<Item>()
+    var save = Set<Item>()
     
     init(_ url: URL) {
         
     }
     
-    struct Item {
+    struct Item: Hashable {
         let hash: String
-        let path: String
+        let name: String
         let category: Category
         
-        init(_ hash: String, _ path: String, _ category: Category) {
+        init(_ hash: String, _ name: String, _ category: Category) {
             self.hash = hash
-            self.path = path
+            self.name = name
             self.category = category
         }
     }
