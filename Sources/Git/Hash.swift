@@ -6,6 +6,10 @@ final class Hash {
         blob(try! .init(contentsOf: url))
     }
     
+    class func tree(_ data: Data) -> Pack {
+        .init("tree", data: data)
+    }
+    
     private class func blob(_ data: Data) -> Pack {
         .init("blob", data: data)
     }
