@@ -1,16 +1,13 @@
 import Foundation
 
 struct Tree {
-    static func scan(_ url: URL) -> Tree {
-        var tree = Tree()
+    static func save(_ url: URL, index: [Indexed]) -> Id {
+        var items = Set<Item>()
         File.contents(url).forEach {
-            tree.avoid.insert(.init(.blob, .init(""), $0))
+            items.insert(.init(.blob, .init(""), $0))
         }
-        return tree
+        return .init("")
     }
-    
-    var avoid = Set<Item>()
-    var save = Set<Item>()
     
     private init() {
         
