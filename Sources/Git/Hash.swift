@@ -18,6 +18,8 @@ final class Hash {
         let id: Id
         let object: Data
         let size: Int
+        private let header = Data([0x78, 0x1])
+        private let prime = UInt32(65521)
         
         fileprivate init(_ prefix: String, data: Data) {
             size = data.count
@@ -29,7 +31,17 @@ final class Hash {
             let location = url.objects.appendingPathComponent(id.head).appendingPathComponent(id.tail)
             guard !location.exists else { return }
             File.create(location.deletingLastPathComponent())
-            try! object.write(to: location, options: .atomic)
+            try! (header + ((object as NSData).compressed(using: .zlib)) + adler32).write(to: location, options: .atomic)
+        }
+        
+        private var adler32: Data {
+            var s1 = UInt32(1)
+            var s2 = UInt32()
+            object.forEach {
+                s1 = (s1 + .init($0)) % prime
+                s2 = (s2 + s1) % prime
+            }
+            return .init(bytes: (s2 << 16 | s1).bigEndian)
         }
     }
 }
