@@ -7,9 +7,11 @@ public final class Status: Publisher, Subscription {
     
     private var sub: AnySubscriber<Report, Never>?
     private var stream: FSEventStreamRef?
+    private let index: Index
     private let url: URL
     
     init(_ url: URL) {
+        index = .init(url)
         self.url = url
     }
     

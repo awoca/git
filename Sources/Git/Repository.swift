@@ -7,7 +7,7 @@ public final class Repository {
     let queue = DispatchQueue(label: "", qos: .utility)
     
     init(_ url: URL) {
-        self.status = .init(url)
+        status = .init(url)
         self.url = url
     }
 }

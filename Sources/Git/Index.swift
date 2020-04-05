@@ -1,14 +1,20 @@
 import Foundation
 
 final class Index {
- 
+    private let url: URL
     
-    func save(_ url: URL) -> Id {
+    init(_ url: URL) {
+        self.url = url
+    }
+    
+    func save() -> Id {
         var items = Set<Tree.Item>()
         File.contents(url).forEach {
             items.insert(.init(.blob, .init(""), $0))
         }
-        return .init("")
+        let pack = Hash.tree(.init())
+        pack.save(url)
+        return pack.id
     }
     
     struct Item {

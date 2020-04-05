@@ -26,8 +26,8 @@ public final class Git {
     public func create(_ url: URL) -> Future<Repository, Error> {
         .init { [weak self] promise in
             self?.queue.async {
+                self?.create(at: url)
                 do {
-                    try self?.create(at: url)
                     guard let repository = try self?.open(at: url) else { return }
                     DispatchQueue.main.async {
                         promise(.success(repository))
@@ -46,10 +46,10 @@ public final class Git {
         return .init(at)
     }
     
-    private func create(at: URL) throws {
-        try File.create(at.git)
-        try File.create(at.refs)
-        try File.create(at.objects)
+    private func create(at: URL) {
+        File.create(at.git)
+        File.create(at.refs)
+        File.create(at.objects)
         _Branch.checkoutMaster(at)
     }
 }

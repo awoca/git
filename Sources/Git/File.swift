@@ -8,8 +8,12 @@ final class File {
         return manager.fileExists(atPath: url.path, isDirectory: &dir) && dir.boolValue
     }
     
-    class func create(_ directory: URL) throws {
-        try manager.createDirectory(at: directory, withIntermediateDirectories: false)
+    class func exists(_ url: URL) -> Bool {
+        manager.fileExists(atPath: url.path)
+    }
+    
+    class func create(_ directory: URL) {
+        try! manager.createDirectory(at: directory, withIntermediateDirectories: true)
     }
     
     class func contents(_ url: URL) -> Set<String> {
