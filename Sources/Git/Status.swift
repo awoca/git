@@ -5,12 +5,12 @@ public final class Status: Publisher, Subscription {
     public typealias Output = Report
     public typealias Failure = Never
     
-    weak var repository: Repository!
     private var sub: AnySubscriber<Report, Never>?
     private var stream: FSEventStreamRef?
+    private let url: URL
     
-    var index: [Indexed] {
-        []
+    init(_ url: URL) {
+        self.url = url
     }
     
     deinit {
@@ -31,7 +31,7 @@ public final class Status: Publisher, Subscription {
     }
     
     private func send() {
-        let contents = File.contents(repository.url)
+        let contents = File.contents(url)
         if contents.isEmpty {
             _ = sub?.receive(Clean())
         } else {
@@ -44,7 +44,7 @@ public final class Status: Publisher, Subscription {
         var context = FSEventStreamContext(version: 0, info: Unmanaged.passUnretained(self).toOpaque(), retain: nil, release: nil, copyDescription: nil)
         stream = FSEventStreamCreate(kCFAllocatorDefault, { _, context, _, _, _, _ in
             Unmanaged<Status>.fromOpaque(context!).takeUnretainedValue().send()
-        }, &context, [repository.url.path] as CFArray, .init(kFSEventStreamEventIdSinceNow), 0.01, .init(kFSEventStreamCreateFlagNone))
+        }, &context, [url.path] as CFArray, .init(kFSEventStreamEventIdSinceNow), 0.01, .init(kFSEventStreamCreateFlagNone))
         FSEventStreamSetDispatchQueue(stream!, DispatchQueue.main)
         FSEventStreamStart(stream!)
         FSEventStreamFlushAsync(stream!)
