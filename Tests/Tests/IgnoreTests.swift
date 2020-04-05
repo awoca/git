@@ -16,7 +16,7 @@ final class IgnoreTests: Tests {
             ".gita",
             "a.git",
             "halo/so.gita"]
-        yes.forEach(create(_:))
+        yes.forEach(create)
         let contents = File.contents(url)
         XCTAssertEqual(3, contents.count)
         yes.forEach { XCTAssertTrue(contents.contains($0), $0) }
@@ -28,8 +28,8 @@ final class IgnoreTests: Tests {
         let no = [
             "avocado/something.txt",
             "hello/world/avocado/file.txt"]
-        yes.forEach(create(_:))
-        no.forEach(create(_:))
+        yes.forEach(create)
+        no.forEach(create)
         let contents = File.contents(url)
         XCTAssertEqual(2, contents.count)
         yes.forEach { XCTAssertTrue(contents.contains($0), $0) }
@@ -42,8 +42,8 @@ final class IgnoreTests: Tests {
             "some/avocado/hello.txt",
             "avocado.txt"]
         let no = ["avocado/something.txt"]
-        yes.forEach(create(_:))
-        no.forEach(create(_:))
+        yes.forEach(create)
+        no.forEach(create)
         let contents = File.contents(url)
         XCTAssertEqual(3, contents.count)
         yes.forEach { XCTAssertTrue(contents.contains($0), $0) }
@@ -59,8 +59,8 @@ final class IgnoreTests: Tests {
             "file/something.txt",
             "avocado/file/something.txt",
             "avocado/something/file"]
-        yes.forEach(create(_:))
-        no.forEach(create(_:))
+        yes.forEach(create)
+        no.forEach(create)
         let contents = File.contents(url)
         XCTAssertEqual(3, contents.count)
         yes.forEach { XCTAssertTrue(contents.contains($0), $0) }
@@ -76,8 +76,8 @@ final class IgnoreTests: Tests {
             "file/something.txt",
             "avocado/file/something.txt",
             "avocado/something/file"]
-        yes.forEach(create(_:))
-        no.forEach(create(_:))
+        yes.forEach(create)
+        no.forEach(create)
         let contents = File.contents(url)
         XCTAssertEqual(3, contents.count)
         yes.forEach { XCTAssertTrue(contents.contains($0), $0) }
@@ -92,8 +92,8 @@ final class IgnoreTests: Tests {
         let no = [
             "file/some",
             "file/other"]
-        yes.forEach(create(_:))
-        no.forEach(create(_:))
+        yes.forEach(create)
+        no.forEach(create)
         let contents = File.contents(url)
         XCTAssertEqual(3, contents.count)
         yes.forEach { XCTAssertTrue(contents.contains($0), $0) }
@@ -112,8 +112,8 @@ final class IgnoreTests: Tests {
             "some/other",
             "awesome/file",
             "awesome/other"]
-        yes.forEach(create(_:))
-        no.forEach(create(_:))
+        yes.forEach(create)
+        no.forEach(create)
         let contents = File.contents(url)
         XCTAssertEqual(3, contents.count)
         yes.forEach { XCTAssertTrue(contents.contains($0), $0) }
@@ -132,8 +132,8 @@ final class IgnoreTests: Tests {
             "some/other",
             "someawe/file",
             "someawe/other"]
-        yes.forEach(create(_:))
-        no.forEach(create(_:))
+        yes.forEach(create)
+        no.forEach(create)
         let contents = File.contents(url)
         XCTAssertEqual(3, contents.count)
         yes.forEach { XCTAssertTrue(contents.contains($0), $0) }
