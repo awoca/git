@@ -12,13 +12,15 @@ let package = Package(
     products: [
         .library(
             name: "Git",
-            targets: ["Git"]),
+            targets: ["Git"])
     ],
     targets: [
         .target(
-            name: "Git"),
+            name: "Git",
+            path: "Sources"),
         .testTarget(
             name: "Tests",
-            dependencies: ["Git"]),
+            dependencies: ["Git"],
+            path: "Tests")
     ]
 )
