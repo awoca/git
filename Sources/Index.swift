@@ -53,8 +53,8 @@ final class Index {
         var group = UInt32()
         var mode = UInt32(33188)
         var conflicts = false
-        var created = UInt32(Date().timeIntervalSince1970)
-        var modified = UInt32(Date().timeIntervalSince1970)
+        var created = UInt32()
+        var modified = UInt32()
         
         func hash(into: inout Hasher) {
             into.combine(path)
