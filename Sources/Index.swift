@@ -51,10 +51,10 @@ final class Index {
         var inode = UInt32()
         var user = UInt32()
         var group = UInt32()
-        var mode = UInt32(33188)
-        var conflicts = false
         var created = UInt32()
         var modified = UInt32()
+        var mode = UInt32(33188)
+        var conflicts = false
         
         func hash(into: inout Hasher) {
             into.combine(path)
