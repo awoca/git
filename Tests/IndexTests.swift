@@ -17,8 +17,8 @@ final class IndexTests: Tests {
         XCTAssertEqual("afile.json", items.first?.path)
         XCTAssertEqual("3b18e512dba79e4c8300dd08aeb37f8e728b8dad", items.first?.hash)
         XCTAssertEqual(12, items.first?.size)
-        XCTAssertEqual(1554190306, items.first?.created.timeIntervalSince1970)
-        XCTAssertEqual(1554190306, items.first?.modified.timeIntervalSince1970)
+        XCTAssertEqual(1554190306, items.first?.created)
+        XCTAssertEqual(1554190306, items.first?.modified)
         XCTAssertEqual(16777220, items.first?.device)
         XCTAssertEqual(10051196, items.first?.inode)
         XCTAssertEqual(502, items.first?.user)
@@ -44,4 +44,6 @@ final class IndexTests: Tests {
     }
 }
 
-private let index0 = "RElSQwAAAAIAAAABXKMP4g4nUXhcow/iDidReAEAAAQAmV58AACBpAAAAfYAAAAUAAAADDsY5RLbp55MgwDdCK6zf45yi42tAAphZmlsZS5qc29uAAAAAAAAAABIOjvvZZYKFlHYMWjy0VATl2F0cg=="
+private let index0 = """
+RElSQwAAAAIAAAABXKMP4g4nUXhcow/iDidReAEAAAQAmV58AACBpAAAAfYAAAAUAAAADDsY5RLbp55MgwDdCK6zf45yi42tAAphZmlsZS5qc29uAAAAAAAAAABIOjvvZZYKFlHYMWjy0VATl2F0cg==
+"""

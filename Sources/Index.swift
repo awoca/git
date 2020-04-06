@@ -4,7 +4,25 @@ final class Index {
     private let url: URL
     
     var items: Set<Item> {
-        []
+        guard var data = try? Data(contentsOf: url.index) else { return [] }
+        data = data.advanced(by: 8)
+        return (0 ..< data.uInt32()).reduce(into: []) { items, _ in
+            var item = Item()
+            item.created = data.uInt32()
+            data = data.advanced(by: 4)
+            item.modified = data.uInt32()
+            data = data.advanced(by: 4)
+            item.device = data.uInt32()
+            item.inode = data.uInt32()
+            item.mode = data.uInt32()
+            item.user = data.uInt32()
+            item.group = data.uInt32()
+            item.size = data.uInt32()
+            item.hash = data.hex(20)
+            item.conflicts = data.conflicts()
+//            item.url = url.appendingPathComponent(try parse.name())
+            items.insert(item)
+        }
     }
     
     init(_ url: URL) {
@@ -28,15 +46,15 @@ final class Index {
     struct Item: Hashable {
         var hash = ""
         var path = ""
-        var size = 0
-        var device = 0
-        var inode = 0
-        var user = 0
-        var group = 0
-        var mode = 33188
+        var size = UInt32()
+        var device = UInt32()
+        var inode = UInt32()
+        var user = UInt32()
+        var group = UInt32()
+        var mode = UInt32(33188)
         var conflicts = false
-        var created = Date()
-        var modified = Date()
+        var created = UInt32(Date().timeIntervalSince1970)
+        var modified = UInt32(Date().timeIntervalSince1970)
         
         func hash(into: inout Hasher) {
             into.combine(path)
