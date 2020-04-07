@@ -12,13 +12,8 @@ struct Tree {
             self.name = name
         }
         
-        func hash(into: inout Hasher) {
-            into.combine(id)
-        }
-        
-        static func == (lhs: Self, rhs: Self) -> Bool {
-            lhs.id == rhs.id
-        }
+        func hash(into: inout Hasher) { into.combine(id) }
+        static func == (lhs: Self, rhs: Self) -> Bool { lhs.id == rhs.id }
     }
     
     enum Category: String {
