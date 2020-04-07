@@ -37,19 +37,6 @@ extension Data {
         append(contentsOf: "\u{0000}".utf8)
     }
     
-    func conflicts() -> Bool {
-        var byte = first!
-        byte >>= 2
-        if (byte & 0x01) == 1 {
-            return true
-        }
-        byte >>= 1
-        if (byte & 0x01) == 1 {
-            return true
-        }
-        return false
-    }
-    
     private mutating func version() -> Int {
         let result = (first! >> 1 & 0x01) == 1 ? 3 : 2
         self = advanced(by: 1)

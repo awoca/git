@@ -12,7 +12,6 @@ final class Index {
         var created = UInt32()
         var modified = UInt32()
         var mode = UInt32(33188)
-        var conflicts = false
         
         func hash(into: inout Hasher) { into.combine(path) }
         static func == (lhs: Self, rhs: Self) -> Bool { lhs.path == rhs.path }
@@ -36,7 +35,6 @@ final class Index {
             item.group = data.uInt32()
             item.size = data.uInt32()
             item.hash = data.hex(20)
-            item.conflicts = data.conflicts()
             item.path = data.path()
             items.insert(item)
         }
