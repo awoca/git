@@ -13,7 +13,6 @@ final class ContentTests: Tests {
     
     func testDirectory() {
         try! FileManager.default.createDirectory(at: url.appendingPathComponent("lorem"), withIntermediateDirectories: false)
-        print(File.contents(url))
         XCTAssertTrue(File.contents(url).isEmpty)
     }
     

@@ -23,10 +23,9 @@ extension Data {
     }
     
     mutating func path() -> String {
-        let version2 = self.version2
-        self = advanced(by: 1)
+        let version = self.version()
         let length = Int(hex(1), radix: 16)!
-        if !version2 {
+        if version == 3 {
             self = advanced(by: 2)
         }
         let result = string(length)
@@ -47,8 +46,10 @@ extension Data {
         return false
     }
     
-    private var version2: Bool {
-        (first! >> 1 & 0x01) != 1
+    private mutating func version() -> Int {
+        let result = (first! >> 1 & 0x01) == 1 ? 3 : 2
+        self = advanced(by: 1)
+        return result
     }
     
     private mutating func clean() {
