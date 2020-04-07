@@ -20,7 +20,7 @@ final class Index {
             item.size = data.uInt32()
             item.hash = data.hex(20)
             item.conflicts = data.conflicts()
-//            item.url = url.appendingPathComponent(try parse.name())
+            item.path = data.path()
             items.insert(item)
         }
     }

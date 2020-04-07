@@ -10,9 +10,27 @@ extension Data {
         .init(Int(hex(4), radix: 16)!)
     }
     
+    mutating func string(_ length: Int) -> String {
+        let result = String(decoding: subdata(in: 0 ..< length), as: UTF8.self)
+        self = advanced(by: length)
+        return result
+    }
+    
     mutating func hex(_ size: Int) -> String {
         let result = subdata(in: 0 ..< size).map { .init(format: "%02hhx", $0) }.joined()
         self = advanced(by: size)
+        return result
+    }
+    
+    mutating func path() -> String {
+        let version2 = self.version2
+        self = advanced(by: 1)
+        let length = Int(hex(1), radix: 16)!
+        if !version2 {
+            self = advanced(by: 2)
+        }
+        let result = string(length)
+        clean()
         return result
     }
     
@@ -27,5 +45,15 @@ extension Data {
             return true
         }
         return false
+    }
+    
+    private var version2: Bool {
+        (first! >> 1 & 0x01) != 1
+    }
+    
+    private mutating func clean() {
+        while .init(decoding: [first!], as: UTF8.self) == "\u{0000}" {
+            self = advanced(by: 1)
+        }
     }
 }
