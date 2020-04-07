@@ -7,10 +7,10 @@ final class IndexTests: Tests {
     override func setUp() {
         super.setUp()
         index = .init(url)
+        try! FileManager.default.createDirectory(at: url.appendingPathComponent(".git"), withIntermediateDirectories: true)
     }
     
     func testLoad() {
-        try! FileManager.default.createDirectory(at: url.appendingPathComponent(".git"), withIntermediateDirectories: true)
         try! Data(base64Encoded: index0)!.write(to: url.appendingPathComponent(".git/index"))
         let items = index.items
         XCTAssertEqual(1, items.count)
@@ -26,16 +26,25 @@ final class IndexTests: Tests {
     }
     
     func testLoadBig() {
-        try! FileManager.default.createDirectory(at: url.appendingPathComponent(".git"), withIntermediateDirectories: true)
         try! Data(base64Encoded: index1)!.write(to: url.appendingPathComponent(".git/index"))
         XCTAssertEqual(22, index.items.count)
     }
     
     func testSave() {
-        try! FileManager.default.createDirectory(at: url.appendingPathComponent(".git"), withIntermediateDirectories: true)
         try! Data(base64Encoded: index0)!.write(to: url.appendingPathComponent(".git/index"))
         _ = index.save([])
         XCTAssertEqual(index0, try? Data(contentsOf: url.appendingPathComponent(".git/index")).base64EncodedString())
+        let items = index.items
+        XCTAssertEqual(1, items.count)
+        XCTAssertEqual("afile.json", items.first?.path)
+        XCTAssertEqual("3b18e512dba79e4c8300dd08aeb37f8e728b8dad", items.first?.hash)
+        XCTAssertEqual(12, items.first?.size)
+        XCTAssertEqual(1554190306, items.first?.created)
+        XCTAssertEqual(1554190306, items.first?.modified)
+        XCTAssertEqual(16777220, items.first?.device)
+        XCTAssertEqual(10051196, items.first?.inode)
+        XCTAssertEqual(502, items.first?.user)
+        XCTAssertEqual(20, items.first?.group)
     }
     
     func testAdd() {

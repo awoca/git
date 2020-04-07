@@ -33,6 +33,10 @@ extension Data {
         return result
     }
     
+    mutating func addNull() {
+        append(contentsOf: "\u{0000}".utf8)
+    }
+    
     func conflicts() -> Bool {
         var byte = first!
         byte >>= 2

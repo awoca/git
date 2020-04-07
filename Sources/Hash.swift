@@ -2,6 +2,10 @@ import Foundation
 import CryptoKit
 
 final class Hash {
+    class func sha1(_ data: Data) -> Insecure.SHA1.Digest {
+        Insecure.SHA1.hash(data: data)
+    }
+    
     class func file(_ url: URL) -> Pack {
         blob(try! .init(contentsOf: url))
     }
@@ -24,7 +28,7 @@ final class Hash {
         fileprivate init(_ prefix: String, data: Data) {
             size = data.count
             object = (prefix + " \(data.count)\u{0000}").utf8 + data
-            id = .init(Insecure.SHA1.hash(data: object).compactMap { .init(format: "%02hhx", $0) }.joined())
+            id = .init(Hash.sha1(object).compactMap { .init(format: "%02hhx", $0) }.joined())
         }
         
         func save(_ url: URL) {

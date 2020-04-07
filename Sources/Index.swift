@@ -40,6 +40,7 @@ final class Index {
             item.path = data.path()
             items.insert(item)
         }
+        
     }
     
     init(_ url: URL) {
@@ -48,6 +49,7 @@ final class Index {
     
     func save(_ adding: Set<String>) -> Id {
         var items = self.items
+        save(items)
         adding.forEach {
             let pack = Hash.file(url.appendingPathComponent($0))
             pack.save(url)
@@ -61,48 +63,59 @@ final class Index {
         return pack.id
     }
     
+    private let map = [
+        0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, // 01234567
+        0x08, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // 89:;<=>?
+        0x00, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x00, // @ABCDEFG
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00  // HIJKLMNO
+    ] as [UInt8]
+    
     private func save(_ items: Set<Item>) {
-        var data = Data()
-        data.append(contentsOf: "DIRC".utf8)
-        data.append(.init(bytes: UInt32(2)))
-        data.append(.init(bytes: UInt32(items.count)))
-        items.sorted { $0.path.caseInsensitiveCompare($1.path) != .orderedDescending }.forEach {
-            data.append(.init(bytes: $0.created))
-            data.append(.init(bytes: UInt32()))
-            data.append(.init(bytes: $0.device))
-            data.append(.init(bytes: $0.inode))
-            data.append(.init(bytes: $0.mode))
-            data.append(.init(bytes: $0.user))
-            data.append(.init(bytes: $0.group))
-            data.append(.init(bytes: $0.size))
-            data.append(.init(bytes: $0.device))
-        }
         
-        serial.string("DIRC")
-        serial.number(UInt32(version))
-        serial.number(UInt32(entries.count))
-        entries.sorted(by: { $0.url.path.compare($1.url.path, options: .caseInsensitive) != .orderedDescending }).forEach {
-            serial.date($0.created)
-            serial.date($0.modified)
-            serial.number(UInt32($0.device))
-            serial.number(UInt32($0.inode))
-            serial.number(UInt32($0.mode))
-            serial.number(UInt32($0.user))
-            serial.number(UInt32($0.group))
-            serial.number(UInt32($0.size))
-            serial.hex($0.id)
-            serial.number(UInt8(0))
-            
-            let name = String($0.url.path.dropFirst(url.path.count + 1))
-            var size = name.count
-            serial.number(UInt8(size))
-            serial.nulled(name)
+        
+        var data = Data()
+        
+        func number<T: BinaryInteger>(_ number: T) { withUnsafeBytes(of: number) { data.append(contentsOf: $0.reversed()) } }
+        
+        data.append(contentsOf: "DIRC".utf8)
+        number(UInt32(2))
+        number(UInt32(1))
+        items.sorted { $0.path.caseInsensitiveCompare($1.path) != .orderedDescending }.forEach {
+            number(UInt32($0.created))
+            number(UInt32(0))
+            number(UInt32($0.modified))
+            number(UInt32(0))
+            number(UInt32($0.device))
+            number(UInt32($0.inode))
+            number(UInt32($0.mode))
+            number(UInt32($0.user))
+            number(UInt32($0.group))
+            number(UInt32($0.size))
+            data.append(contentsOf: hex($0.hash))
+            number(UInt8(0))
+            number(UInt8($0.path.count))
+            data.append(contentsOf: $0.path.utf8)
+            data.addNull()
+            var size = $0.path.count
             while (size + 7) % 8 != 0 {
-                serial.string("\u{0000}")
+                data.addNull()
                 size += 1
             }
         }
-        serial.hash()
-        try! serial.data.write(to: url.appendingPathComponent(".git/index"), options: .atomic)
+        let a = Hash.sha1(data)
+        print(data.count)
+        data.append(contentsOf: a)
+        print(data.count)
+        try! data.write(to: url.index, options: .atomic)
+    }
+    
+    func hex(_ string: String) -> [UInt8] {
+        string.utf8.reduce(into: ([UInt8](), [UInt8]())) {
+            $0.0.append(map[Int($1 & 0x1F ^ 0x10)])
+            if $0.0.count == 2 {
+                $0.1.append($0.0[0] << 4 | $0.0[1])
+                $0.0 = []
+            }
+        }.1
     }
 }
