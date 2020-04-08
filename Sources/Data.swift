@@ -7,7 +7,7 @@ extension Data {
     }
     
     mutating func uInt32() -> UInt32 {
-        .init(Int(hex(4), radix: 16)!)
+        UInt32(hex(4), radix: 16)!
     }
     
     mutating func string(_ length: Int) -> String {
@@ -33,7 +33,7 @@ extension Data {
         return result
     }
     
-    mutating func addNull() {
+    mutating func null() {
         append(contentsOf: "\u{0000}".utf8)
     }
     
@@ -41,6 +41,14 @@ extension Data {
         Swift.withUnsafeBytes(of: reversing) {
             append(contentsOf: $0.reversed())
         }
+    }
+    
+    mutating func hex(_ string: String) {
+        append(contentsOf: stride(from: 0, to: string.count, by: 2).map {
+            string[string.index(string.startIndex, offsetBy: $0) ... string.index(string.startIndex, offsetBy: $0 + 1)]
+        }.map {
+            UInt8($0, radix: 16)!
+        })
     }
     
     private mutating func version() -> Int {
