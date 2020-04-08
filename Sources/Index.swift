@@ -9,12 +9,17 @@ final class Index {
         var inode = UInt32()
         var user = UInt32()
         var group = UInt32()
-        var created = UInt32()
-        var modified = UInt32()
         var mode = UInt32(33188)
+        var created = Timestamp()
+        var modified = Timestamp()
         
         func hash(into: inout Hasher) { into.combine(path) }
         static func == (lhs: Self, rhs: Self) -> Bool { lhs.path == rhs.path }
+    }
+    
+    struct Timestamp {
+        var time = UInt32()
+        var millis = UInt32()
     }
     
     private let url: URL
@@ -24,10 +29,10 @@ final class Index {
         data = data.advanced(by: 8)
         return (0 ..< data.uInt32()).reduce(into: []) { items, _ in
             var item = Item()
-            item.created = data.uInt32()
-            data = data.advanced(by: 4)
-            item.modified = data.uInt32()
-            data = data.advanced(by: 4)
+            item.created.time = data.uInt32()
+            item.created.millis = data.uInt32()
+            item.modified.time = data.uInt32()
+            item.modified.millis = data.uInt32()
             item.device = data.uInt32()
             item.inode = data.uInt32()
             item.mode = data.uInt32()
@@ -38,7 +43,6 @@ final class Index {
             item.path = data.path()
             items.insert(item)
         }
-        
     }
     
     init(_ url: URL) {
@@ -77,12 +81,12 @@ final class Index {
         
         data.append(contentsOf: "DIRC".utf8)
         number(UInt32(2))
-        number(UInt32(1))
+        number(UInt32(items.count))
         items.sorted { $0.path.caseInsensitiveCompare($1.path) != .orderedDescending }.forEach {
-            number(UInt32($0.created))
-            number(UInt32(0))
-            number(UInt32($0.modified))
-            number(UInt32(0))
+            number(UInt32($0.created.time))
+            number(UInt32($0.created.millis))
+            number(UInt32($0.modified.time))
+            number(UInt32($0.modified.millis))
             number(UInt32($0.device))
             number(UInt32($0.inode))
             number(UInt32($0.mode))

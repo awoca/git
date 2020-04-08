@@ -3,6 +3,7 @@ import XCTest
 
 final class TreeTests: Tests {
     func testEmpty() {
+        try! FileManager.default.createDirectory(at: url.appendingPathComponent(".git"), withIntermediateDirectories: true)
         XCTAssertEqual("4b825dc642cb6eb9a060e54bf8d69288fbee4904", Index(url).save([]).hash)
         XCTAssertEqual(15, try? Data(contentsOf: url.appendingPathComponent(".git/objects/4b/825dc642cb6eb9a060e54bf8d69288fbee4904")).count)
     }
