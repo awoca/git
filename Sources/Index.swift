@@ -73,29 +73,24 @@ final class Index {
     ] as [UInt8]
     
     private func save(_ items: Set<Item>) {
-        
-        
         var data = Data()
-        
-        func number<T: BinaryInteger>(_ number: T) { withUnsafeBytes(of: number) { data.append(contentsOf: $0.reversed()) } }
-        
         data.append(contentsOf: "DIRC".utf8)
-        number(UInt32(2))
-        number(UInt32(items.count))
+        data.uInt32(.init(2))
+        data.uInt32(.init(items.count))
         items.sorted { $0.path.caseInsensitiveCompare($1.path) != .orderedDescending }.forEach {
-            number(UInt32($0.created.time))
-            number(UInt32($0.created.millis))
-            number(UInt32($0.modified.time))
-            number(UInt32($0.modified.millis))
-            number(UInt32($0.device))
-            number(UInt32($0.inode))
-            number(UInt32($0.mode))
-            number(UInt32($0.user))
-            number(UInt32($0.group))
-            number(UInt32($0.size))
+            data.uInt32(.init($0.created.time))
+            data.uInt32(.init($0.created.millis))
+            data.uInt32(.init($0.modified.time))
+            data.uInt32(.init($0.modified.millis))
+            data.uInt32(.init($0.device))
+            data.uInt32(.init($0.inode))
+            data.uInt32(.init($0.mode))
+            data.uInt32(.init($0.user))
+            data.uInt32(.init($0.group))
+            data.uInt32(.init($0.size))
             data.append(contentsOf: hex($0.hash))
-            number(UInt8(0))
-            number(UInt8($0.path.count))
+            data.append(0)
+            data.append(.init($0.path.count))
             data.append(contentsOf: $0.path.utf8)
             data.addNull()
             var size = $0.path.count
@@ -104,10 +99,7 @@ final class Index {
                 size += 1
             }
         }
-        let a = Hash.sha1(data)
-        print(data.count)
-        data.append(contentsOf: a)
-        print(data.count)
+        data.append(contentsOf: Hash.sha1(data))
         try! data.write(to: url.index, options: .atomic)
     }
     

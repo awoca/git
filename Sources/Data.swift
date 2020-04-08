@@ -37,6 +37,12 @@ extension Data {
         append(contentsOf: "\u{0000}".utf8)
     }
     
+    mutating func uInt32(_ reversing: UInt32) {
+        Swift.withUnsafeBytes(of: reversing) {
+            append(contentsOf: $0.reversed())
+        }
+    }
+    
     private mutating func version() -> Int {
         let result = (first! >> 1 & 0x01) == 1 ? 3 : 2
         self = advanced(by: 1)
