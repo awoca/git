@@ -2,10 +2,35 @@ import Foundation
 import Combine
 
 public final class Status: Publisher, Subscription {
-    public typealias Output = Report
+    public enum Mode {
+        case
+        untracked,
+        added,
+        modified,
+        deleted
+    }
+    
+    public struct Item: Hashable {
+        public let mode: Mode
+        public let path: String
+        
+        fileprivate static func untracked(_ path: String) -> Item {
+            .init(mode: .untracked, path: path)
+        }
+        
+        public func hash(into: inout Hasher) {
+            into.combine(path)
+        }
+        
+        public static func != (lhs: Self, rhs: Self) -> Bool {
+            lhs.path == rhs.path
+        }
+    }
+    
+    public typealias Output = Set<Item>
     public typealias Failure = Never
     
-    private var sub: AnySubscriber<Report, Never>?
+    private var sub: AnySubscriber<Output, Failure>?
     private var stream: FSEventStreamRef?
     private let index: Index
     private let url: URL
@@ -19,7 +44,7 @@ public final class Status: Publisher, Subscription {
         stop()
     }
     
-    public func receive<S>(subscriber: S) where S : Subscriber, Never == S.Failure, Report == S.Input {
+    public func receive<S>(subscriber: S) where S : Subscriber, Failure == S.Failure, Output == S.Input {
         sub = .init(subscriber)
         subscriber.receive(subscription: self)
         start()
@@ -33,12 +58,7 @@ public final class Status: Publisher, Subscription {
     }
     
     private func send() {
-        let contents = File.contents(url)
-        if contents.isEmpty {
-            _ = sub?.receive(Clean())
-        } else {
-            _ = sub?.receive(Changes(items: .init(contents.map { .init(status: .untracked, path: $0) })))
-        }
+        _ = sub?.receive(.init(File.contents(url).map(Item.untracked)))
     }
     
     private func start() {

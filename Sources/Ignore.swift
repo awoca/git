@@ -13,20 +13,20 @@ final class Ignore {
         
         try? String(decoding: Data(contentsOf: url.ignore), as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines).components(separatedBy: "\n").forEach {
             if $0.hasPrefix("**/") {
-                names.rules.append(.init($0.dropFirst(3)))
+                names.rules.insert(.init($0.dropFirst(3)))
             } else if $0.hasSuffix("/**") {
-                relatives.rules.append($0.hasPrefix("/") ? .init($0.dropFirst().dropLast(3)) : .init($0.dropLast(3)))
+                relatives.rules.insert($0.hasPrefix("/") ? .init($0.dropFirst().dropLast(3)) : .init($0.dropLast(3)))
             } else if $0.hasPrefix("*") {
-                leadingStar.rules.append(.init($0.dropFirst()))
+                leadingStar.rules.insert(.init($0.dropFirst()))
             } else if $0.hasSuffix("*") {
-                trailingStar.rules.append(.init($0.dropLast()))
+                trailingStar.rules.insert(.init($0.dropLast()))
             } else if $0.hasSuffix("/") {
-                folders.rules.append(($0.hasPrefix("/") ? "" : "/") + $0)
+                folders.rules.insert(($0.hasPrefix("/") ? "" : "/") + $0)
             } else {
                 if $0.contains("/") {
-                    relatives.rules.append($0.hasPrefix("/") ? .init($0.dropFirst()) : $0)
+                    relatives.rules.insert($0.hasPrefix("/") ? .init($0.dropFirst()) : $0)
                 } else {
-                    names.rules.append($0)
+                    names.rules.insert($0)
                 }
             }
         }
@@ -43,13 +43,13 @@ final class Ignore {
 }
 
 private protocol Command {
-    var rules: [String] { get set }
+    var rules: Set<String> { get set }
     
     func validate(_ string: String) -> Bool
 }
 
 private struct Folders: Command {
-    var rules = ["/.git/"]
+    var rules = Set(["/.git/"])
     
     func validate(_ string: String) -> Bool {
         let compare = "/" + string
@@ -62,7 +62,7 @@ private struct Folders: Command {
 }
 
 private struct Relatives: Command {
-    var rules = [String]()
+    var rules = Set<String>()
     
     func validate(_ string: String) -> Bool {
         for rule in rules {
@@ -80,7 +80,7 @@ private struct Relatives: Command {
 }
 
 private struct Names: Command {
-    var rules = [String]()
+    var rules = Set<String>()
     
     func validate(_ string: String) -> Bool {
         for component in string.components(separatedBy: "/") {
@@ -92,7 +92,7 @@ private struct Names: Command {
 }
 
 private struct LeadingStar: Command {
-    var rules = [String]()
+    var rules = Set<String>()
     
     func validate(_ string: String) -> Bool {
         for component in string.components(separatedBy: "/") {
@@ -106,7 +106,7 @@ private struct LeadingStar: Command {
 }
 
 private struct TrailingStar: Command {
-    var rules = [String]()
+    var rules = Set<String>()
     
     func validate(_ string: String) -> Bool {
         for component in string.components(separatedBy: "/") {
