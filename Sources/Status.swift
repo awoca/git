@@ -2,36 +2,13 @@ import Foundation
 import Combine
 
 public final class Status: Publisher, Subscription {
-    public enum Mode {
-        case
-        untracked,
-        added,
-        modified,
-        deleted
+    public struct Output {
+        var untracked = Set<String>()
+        var added = Set<String>()
+        var modified = Set<String>()
+        var deleted = Set<String>()
     }
     
-    public struct Item: Hashable {
-        public let mode: Mode
-        public let path: String
-        
-        fileprivate static func added(_ path: String) -> Item {
-            .init(mode: .added, path: path)
-        }
-        
-        fileprivate static func untracked(_ path: String) -> Item {
-            .init(mode: .untracked, path: path)
-        }
-        
-        public func hash(into: inout Hasher) {
-            into.combine(path)
-        }
-        
-        public static func != (lhs: Self, rhs: Self) -> Bool {
-            lhs.path == rhs.path
-        }
-    }
-    
-    public typealias Output = Set<Item>
     public typealias Failure = Never
     
     private var sub: AnySubscriber<Output, Failure>?
@@ -62,17 +39,17 @@ public final class Status: Publisher, Subscription {
     }
     
     private func send() {
-        var changes = Set<Item>()
+        var output = Output()
         let items = index.items
         File.contents(url).forEach { path in
             if items.contains(where: { $0.path == path }) {
-                changes.insert(.added(path))
+                output.added.insert(path)
             } else {
-                changes.insert(.untracked(path))
+                output.untracked.insert(path)
             }
         }
         DispatchQueue.main.async { [weak self] in
-            _ = self?.sub?.receive(changes)
+            _ = self?.sub?.receive(output)
         }
     }
     

@@ -11,7 +11,10 @@ final class StatusTests: Tests {
             DispatchQueue.global(qos: .background).async {
                 self.repository.status.sink {
                     XCTAssertEqual(.main, Thread.current)
-                    XCTAssertTrue($0.isEmpty)
+                    XCTAssertTrue($0.added.isEmpty)
+                    XCTAssertTrue($0.untracked.isEmpty)
+                    XCTAssertTrue($0.deleted.isEmpty)
+                    XCTAssertTrue($0.modified.isEmpty)
                     expect.fulfill()
                     self.subs = []
                 }.store(in: &self.subs)
@@ -26,8 +29,7 @@ final class StatusTests: Tests {
         git.create(url).sink(receiveCompletion: { _ in }) {
             self.repository = $0
             self.repository.status.sink {
-                XCTAssertEqual(.untracked, $0.first?.mode)
-                XCTAssertEqual("file.txt", $0.first?.path)
+                XCTAssertEqual("file.txt", $0.untracked.first)
                 expect.fulfill()
                 self.subs = []
             }.store(in: &self.subs)
@@ -40,8 +42,7 @@ final class StatusTests: Tests {
         git.create(url).sink(receiveCompletion: { _ in }) {
             self.repository = $0
             self.repository.status.sink {
-                XCTAssertEqual(.untracked, $0.first?.mode)
-                XCTAssertEqual("file.txt", $0.first?.path)
+                XCTAssertEqual("file.txt", $0.untracked.first)
                 expect.fulfill()
                 self.subs = []
             }.store(in: &self.subs)
@@ -57,8 +58,7 @@ final class StatusTests: Tests {
             try! Data("hello world".utf8).write(to: self.url.appendingPathComponent("file.txt"))
             _ = Index(self.url).save(["file.txt"])
             self.repository.status.sink {
-                XCTAssertEqual(.added, $0.first?.mode)
-                XCTAssertEqual("file.txt", $0.first?.path)
+                XCTAssertEqual("file.txt", $0.added.first)
                 expect.fulfill()
                 self.subs = []
             }.store(in: &self.subs)
