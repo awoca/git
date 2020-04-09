@@ -51,23 +51,28 @@ final class Index {
     
     func save(_ adding: Set<String>) -> Id {
         var items = self.items
-        var tree = Set<Tree.Item>()
+        var tree = Data()
         File.contents(url).forEach { path in
+            var item: Item?
             if adding.contains(path) {
                 let pack = Hash.file(url.appendingPathComponent(path))
-                var item = Item()
-                item.id = pack.id
-                item.size = .init(pack.size)
-                item.path = path
-                item.created.time = .init(Date().timeIntervalSince1970)
-                item.modified.time = item.created.time
+                item = Item()
+                item!.id = pack.id
+                item!.size = .init(pack.size)
+                item!.path = path
+                item!.created.time = .init(Date().timeIntervalSince1970)
+                item!.modified.time = item!.created.time
+                items.insert(item!)
                 pack.save(url)
-                items.insert(item)
-            } else if let item = items.first(where: { $0.path == path }) {
-                tree.insert(.init(.blob, item.id, path))
+            } else {
+                item = items.first { $0.path == path }
             }
+            guard item != nil else { return }
+            tree.append(contentsOf: (Tree.Category.blob.rawValue + " " + path).utf8)
+            tree.null()
+            tree.hex(item!.id.hash)
         }
-        let pack = Hash.tree(.init())
+        let pack = Hash.tree(tree)
         pack.save(url)
         save(items)
         return pack.id
