@@ -14,6 +14,10 @@ public final class Status: Publisher, Subscription {
         public let mode: Mode
         public let path: String
         
+        fileprivate static func added(_ path: String) -> Item {
+            .init(mode: .added, path: path)
+        }
+        
         fileprivate static func untracked(_ path: String) -> Item {
             .init(mode: .untracked, path: path)
         }
@@ -58,7 +62,18 @@ public final class Status: Publisher, Subscription {
     }
     
     private func send() {
-        _ = sub?.receive(.init(File.contents(url).map(Item.untracked)))
+        var changes = Set<Item>()
+        let items = index.items
+        File.contents(url).forEach { path in
+            if items.contains(where: { $0.path == path }) {
+                changes.insert(.added(path))
+            } else {
+                changes.insert(.untracked(path))
+            }
+        }
+        DispatchQueue.main.async { [weak self] in
+            _ = self?.sub?.receive(changes)
+        }
     }
     
     private func start() {
@@ -67,7 +82,7 @@ public final class Status: Publisher, Subscription {
         stream = FSEventStreamCreate(kCFAllocatorDefault, { _, context, _, _, _, _ in
             Unmanaged<Status>.fromOpaque(context!).takeUnretainedValue().send()
         }, &context, [url.path] as CFArray, .init(kFSEventStreamEventIdSinceNow), 0.01, .init(kFSEventStreamCreateFlagNone))
-        FSEventStreamSetDispatchQueue(stream!, DispatchQueue.main)
+        FSEventStreamSetDispatchQueue(stream!, .init(label: "", qos: .utility))
         FSEventStreamStart(stream!)
         FSEventStreamFlushAsync(stream!)
     }

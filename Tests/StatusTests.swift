@@ -8,12 +8,14 @@ final class StatusTests: Tests {
         let expect = expectation(description: "")
         git.create(url).sink(receiveCompletion: { _ in }) {
             self.repository = $0
-            self.repository.status.sink {
-                XCTAssertEqual(.main, Thread.current)
-                XCTAssertTrue($0.isEmpty)
-                expect.fulfill()
-                self.subs = []
-            }.store(in: &self.subs)
+            DispatchQueue.global(qos: .background).async {
+                self.repository.status.sink {
+                    XCTAssertEqual(.main, Thread.current)
+                    XCTAssertTrue($0.isEmpty)
+                    expect.fulfill()
+                    self.subs = []
+                }.store(in: &self.subs)
+            }
         }.store(in: &subs)
         waitForExpectations(timeout: 1)
     }
