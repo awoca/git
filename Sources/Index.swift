@@ -2,7 +2,7 @@ import Foundation
 
 final class Index {
     struct Item: Hashable {
-        var hash = ""
+        var id = Id("")
         var path = ""
         var size = UInt32()
         var device = UInt32()
@@ -39,7 +39,7 @@ final class Index {
             item.user = data.uInt32()
             item.group = data.uInt32()
             item.size = data.uInt32()
-            item.hash = data.hex(20)
+            item.id = .init(data.hex(20))
             item.path = data.path()
             items.insert(item)
         }
@@ -51,24 +51,26 @@ final class Index {
     
     func save(_ adding: Set<String>) -> Id {
         var items = self.items
-        adding.forEach {
-            let pack = Hash.file(url.appendingPathComponent($0))
+        adding.forEach { path in
+            guard !items.contains(where: { $0.path == path }) else { return }
+            let pack = Hash.file(url.appendingPathComponent(path))
             var item = Item()
-            item.hash = pack.id.hash
+            item.id = pack.id
             item.size = .init(pack.size)
-            item.path = $0
+            item.path = path
             item.created.time = .init(Date().timeIntervalSince1970)
             item.modified.time = item.created.time
             pack.save(url)
             items.insert(item)
         }
-        save(items)
         var tree = Set<Tree.Item>()
-        File.contents(url).filter(adding.contains).forEach {
-            tree.insert(.init(.blob, .init(""), $0))
+        File.contents(url).filter(adding.contains).forEach { path in
+            guard let item = items.first(where: { $0.path == path }) else { return }
+            tree.insert(.init(.blob, item.id, path))
         }
         let pack = Hash.tree(.init())
         pack.save(url)
+        save(items)
         return pack.id
     }
     
@@ -88,7 +90,7 @@ final class Index {
             data.uInt32(.init($0.user))
             data.uInt32(.init($0.group))
             data.uInt32(.init($0.size))
-            data.hex($0.hash)
+            data.hex($0.id.hash)
             data.append(0)
             data.append(.init($0.path.count))
             data.append(contentsOf: $0.path.utf8)

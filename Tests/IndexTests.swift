@@ -15,7 +15,7 @@ final class IndexTests: Tests {
         let items = index.items
         XCTAssertEqual(1, items.count)
         XCTAssertEqual("afile.json", items.first?.path)
-        XCTAssertEqual("3b18e512dba79e4c8300dd08aeb37f8e728b8dad", items.first?.hash)
+        XCTAssertEqual("3b18e512dba79e4c8300dd08aeb37f8e728b8dad", items.first?.id.hash)
         XCTAssertEqual(12, items.first?.size)
         XCTAssertEqual(1554190306, items.first?.created.time)
         XCTAssertEqual(237457784, items.first?.created.millis)
@@ -45,11 +45,25 @@ final class IndexTests: Tests {
         XCTAssertTrue(FileManager.default.fileExists(atPath: url.appendingPathComponent(".git/objects/3b/18e512dba79e4c8300dd08aeb37f8e728b8dad").path))
         let items = index.items
         XCTAssertEqual(1, items.count)
-        XCTAssertEqual("3b18e512dba79e4c8300dd08aeb37f8e728b8dad", items.first?.hash)
+        XCTAssertEqual("3b18e512dba79e4c8300dd08aeb37f8e728b8dad", items.first?.id.hash)
         XCTAssertEqual("file.json", items.first?.path)
         XCTAssertEqual(12, items.first?.size)
         XCTAssertLessThan(1, items.first?.created.time ?? 0)
         XCTAssertLessThan(1, items.first?.modified.time ?? 0)
+    }
+    
+    func testNotOverWriting() {
+        let file = url.appendingPathComponent("file.json")
+        try! FileManager.default.createDirectory(at: url.appendingPathComponent(".git/objects/3b"), withIntermediateDirectories: true)
+        try! Data("hello world\n".utf8).write(to: file)
+        _ = index.save(["file.json"])
+        try! Data("lorem ipsum".utf8).write(to: url.appendingPathComponent(".git/objects/3b/18e512dba79e4c8300dd08aeb37f8e728b8dad"))
+        _ = index.save(["file.json"])
+        XCTAssertEqual("lorem ipsum", try! .init(decoding: Data(contentsOf: url.appendingPathComponent(".git/objects/3b/18e512dba79e4c8300dd08aeb37f8e728b8dad")), as: UTF8.self))
+    }
+    
+    func testAddingFileChanged() {
+        XCTFail()
     }
 }
 
