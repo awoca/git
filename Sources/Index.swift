@@ -62,6 +62,7 @@ final class Index {
                 item!.path = path
                 item!.created.time = .init(Date().timeIntervalSince1970)
                 item!.modified.time = item!.created.time
+                items.remove(item!)
                 items.insert(item!)
                 pack.save(url)
             } else {

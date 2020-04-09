@@ -60,6 +60,9 @@ final class IndexTests: Tests {
         XCTAssertTrue(FileManager.default.fileExists(atPath: url.appendingPathComponent(".git/objects/3b/18e512dba79e4c8300dd08aeb37f8e728b8dad").path))
         try! Data("lorem ipsum\n".utf8).write(to: file)
         _ = index.save(["file.json"])
+        let items = index.items
+        XCTAssertEqual(1, items.count)
+        XCTAssertEqual("01a59b011a48660bb3828ec72b2b08990b8cf56b", items.first?.id.hash)
         XCTAssertEqual("eAFLyslPUjA0YsjJL0rNVcgsKC7N5QIARH4Gmg==",
                        try? Data(contentsOf: url.appendingPathComponent(".git/objects/01/a59b011a48660bb3828ec72b2b08990b8cf56b")).base64EncodedString())
     }
