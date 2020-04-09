@@ -51,11 +51,18 @@ final class Index {
     
     func save(_ adding: Set<String>) -> Id {
         var items = self.items
-        save(items)
         adding.forEach {
             let pack = Hash.file(url.appendingPathComponent($0))
+            var item = Item()
+            item.hash = pack.id.hash
+            item.size = .init(pack.size)
+            item.path = $0
+            item.created.time = .init(Date().timeIntervalSince1970)
+            item.modified.time = item.created.time
             pack.save(url)
+            items.insert(item)
         }
+        save(items)
         var tree = Set<Tree.Item>()
         File.contents(url).filter(adding.contains).forEach {
             tree.insert(.init(.blob, .init(""), $0))

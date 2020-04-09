@@ -33,20 +33,9 @@ final class IndexTests: Tests {
     }
     
     func testSave() {
-        try! Data(base64Encoded: index0)!.write(to: url.appendingPathComponent(".git/index"))
+        try! Data(base64Encoded: index1)!.write(to: url.appendingPathComponent(".git/index"))
         _ = index.save([])
-        XCTAssertEqual(index0, try? Data(contentsOf: url.appendingPathComponent(".git/index")).base64EncodedString())
-        let items = index.items
-        XCTAssertEqual(1, items.count)
-        XCTAssertEqual("afile.json", items.first?.path)
-        XCTAssertEqual("3b18e512dba79e4c8300dd08aeb37f8e728b8dad", items.first?.hash)
-        XCTAssertEqual(12, items.first?.size)
-        XCTAssertEqual(1554190306, items.first?.created.time)
-        XCTAssertEqual(1554190306, items.first?.modified.time)
-        XCTAssertEqual(16777220, items.first?.device)
-        XCTAssertEqual(10051196, items.first?.inode)
-        XCTAssertEqual(502, items.first?.user)
-        XCTAssertEqual(20, items.first?.group)
+        XCTAssertEqual(index1, try? Data(contentsOf: url.appendingPathComponent(".git/index")).base64EncodedString())
     }
     
     func testAdd() {
@@ -58,6 +47,9 @@ final class IndexTests: Tests {
         XCTAssertEqual(1, items.count)
         XCTAssertEqual("3b18e512dba79e4c8300dd08aeb37f8e728b8dad", items.first?.hash)
         XCTAssertEqual("file.json", items.first?.path)
+        XCTAssertEqual(12, items.first?.size)
+        XCTAssertLessThan(1, items.first?.created.time ?? 0)
+        XCTAssertLessThan(1, items.first?.modified.time ?? 0)
     }
 }
 
