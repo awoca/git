@@ -1,13 +1,49 @@
 import Foundation
+import Combine
 
 public final class Repository {
-    public var branch: Branch { _Branch.current(url) }
-    public let status: Status
+    public var credentials = Credentials()
     public let url: URL
-    private let queue = DispatchQueue(label: "", qos: .utility)
+    public let status = Status()
+    let queue = DispatchQueue(label: "", qos: .utility)
+    let index = Index()
+    private let head = Head()
     
     init(_ url: URL) {
-        status = .init(url)
         self.url = url
+        status.repository = self
+        head.repository = self
+        index.repository = self
+    }
+    
+    public var branch: Future<String, Never> {
+        .init { [weak self] promise in
+            self?.queue.async {
+                guard let branch = self?.head.branch else { return }
+                DispatchQueue.main.async {
+                    promise(.success(branch))
+                }
+            }
+        }
+    }
+    
+    public var log: Future<Commit?, Never> {
+        .init { [weak self] promise in
+            self?.queue.async {
+                DispatchQueue.main.async {
+                    promise(.success(nil))
+                }
+            }
+        }
+    }
+    
+    public func branch(_ name: String) {
+        queue.async { [weak self] in
+            self?.head.branch(name)
+        }
+    }
+    
+    public func commit(_ paths: [String], message: String) {
+        
     }
 }

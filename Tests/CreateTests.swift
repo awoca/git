@@ -3,6 +3,7 @@ import Git
 
 final class CreateTests: Tests {
     func testCreate() {
+        var repository: Repository!
         let expect = expectation(description: "")
         
         let root = url.appendingPathComponent(".git")
@@ -10,14 +11,10 @@ final class CreateTests: Tests {
         let objects = root.appendingPathComponent("objects")
         XCTAssertFalse(FileManager.default.fileExists(atPath: root.path))
         
-        git.create(url).sink(receiveCompletion: {
-            switch $0 {
-            case .finished: break
-            default: XCTFail()
-            }
-        }) {
+        git.create(url).sink {
+            repository = $0
             XCTAssertEqual(.main, Thread.current)
-            XCTAssertEqual(self.url, $0.url)
+            XCTAssertEqual(self.url, repository.url)
             
             var dir = ObjCBool(false)
             XCTAssertTrue(FileManager.default.fileExists(atPath: root.path, isDirectory: &dir))
@@ -31,9 +28,10 @@ final class CreateTests: Tests {
             XCTAssertTrue(FileManager.default.fileExists(atPath: objects.path, isDirectory: &dir))
             XCTAssertTrue(dir.boolValue)
             
-            XCTAssertTrue($0.branch is MasterBranch)
-            
-            expect.fulfill()
+            repository.branch.sink {
+                XCTAssertEqual("master", $0)
+                expect.fulfill()
+            }.store(in: &self.subs)
         }.store(in: &subs)
         
         waitForExpectations(timeout: 1)

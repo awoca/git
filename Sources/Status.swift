@@ -11,16 +11,9 @@ public final class Status: Publisher, Subscription {
     
     public typealias Failure = Never
     
+    weak var repository: Repository!
     private var sub: AnySubscriber<Output, Failure>?
     private var stream: FSEventStreamRef?
-    private let index: Index
-    private let url: URL
-    private let dispatch = DispatchQueue(label: "", qos: .utility)
-    
-    init(_ url: URL) {
-        index = .init(url)
-        self.url = url
-    }
     
     deinit {
         stop()
@@ -39,7 +32,7 @@ public final class Status: Publisher, Subscription {
     }
     
     public func refresh() {
-        dispatch.async { [weak self] in
+        repository.queue.async { [weak self] in
             self?.send()
         }
     }
@@ -49,8 +42,8 @@ public final class Status: Publisher, Subscription {
         var context = FSEventStreamContext(version: 0, info: Unmanaged.passUnretained(self).toOpaque(), retain: nil, release: nil, copyDescription: nil)
         stream = FSEventStreamCreate(kCFAllocatorDefault, { _, context, _, _, _, _ in
             Unmanaged<Status>.fromOpaque(context!).takeUnretainedValue().send()
-        }, &context, [url.path] as CFArray, .init(kFSEventStreamEventIdSinceNow), 0.01, .init(kFSEventStreamCreateFlagNone))
-        FSEventStreamSetDispatchQueue(stream!, dispatch)
+        }, &context, [repository.url.path] as CFArray, .init(kFSEventStreamEventIdSinceNow), 0.01, .init(kFSEventStreamCreateFlagNone))
+        FSEventStreamSetDispatchQueue(stream!, repository.queue)
         FSEventStreamStart(stream!)
     }
     
@@ -63,8 +56,8 @@ public final class Status: Publisher, Subscription {
     
     private func send() {
         var output = Output()
-        let items = index.items
-        File.contents(url).forEach { path in
+        let items = repository.index.items
+        File.contents(repository.url).forEach { path in
             if items.contains(where: { $0.path == path }) {
                 output.added.insert(path)
             } else {

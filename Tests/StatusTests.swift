@@ -6,7 +6,7 @@ final class StatusTests: Tests {
     
     func testClean() {
         let expect = expectation(description: "")
-        git.create(url).sink(receiveCompletion: { _ in }) {
+        git.create(url).sink {
             self.repository = $0
             DispatchQueue.global(qos: .background).async {
                 self.repository.status.sink {
@@ -26,7 +26,7 @@ final class StatusTests: Tests {
     func testNewFileBeforeCreate() {
         let expect = expectation(description: "")
         try! Data("hello world".utf8).write(to: url.appendingPathComponent("file.txt"))
-        git.create(url).sink(receiveCompletion: { _ in }) {
+        git.create(url).sink {
             self.repository = $0
             self.repository.status.sink {
                 XCTAssertEqual("file.txt", $0.untracked.first)
@@ -39,7 +39,7 @@ final class StatusTests: Tests {
     
     func testNewFileAfterCreate() {
         let expect = expectation(description: "")
-        git.create(url).sink(receiveCompletion: { _ in }) {
+        git.create(url).sink {
             self.repository = $0
             self.repository.status.sink {
                 XCTAssertEqual("file.txt", $0.untracked.first)
@@ -53,10 +53,10 @@ final class StatusTests: Tests {
     
     func testAdded() {
         let expect = expectation(description: "")
-        git.create(url).sink(receiveCompletion: { _ in }) {
+        git.create(url).sink {
             self.repository = $0
             try! Data("hello world".utf8).write(to: self.url.appendingPathComponent("file.txt"))
-            _ = Index(self.url).save(["file.txt"])
+            _ = self.repository.index.save(["file.txt"])
             self.repository.status.sink {
                 XCTAssertEqual("file.txt", $0.added.first)
                 expect.fulfill()

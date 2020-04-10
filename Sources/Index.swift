@@ -22,10 +22,10 @@ final class Index {
         var millis = UInt32()
     }
     
-    private let url: URL
+    weak var repository: Repository!
     
     var items: Set<Item> {
-        guard var data = try? Data(contentsOf: url.index) else { return [] }
+        guard var data = try? Data(contentsOf: repository.url.index) else { return [] }
         data = data.advanced(by: 8)
         return (0 ..< data.uInt32()).reduce(into: []) { items, _ in
             var item = Item()
@@ -45,17 +45,13 @@ final class Index {
         }
     }
     
-    init(_ url: URL) {
-        self.url = url
-    }
-    
     func save(_ adding: Set<String>) -> Id {
         var items = self.items
         var tree = Data()
-        File.contents(url).forEach { path in
+        File.contents(repository.url).forEach { path in
             var item: Item?
             if adding.contains(path) {
-                let pack = Hash.file(url.appendingPathComponent(path))
+                let pack = Hash.file(repository.url.appendingPathComponent(path))
                 item = Item()
                 item!.id = pack.id
                 item!.size = .init(pack.size)
@@ -64,7 +60,7 @@ final class Index {
                 item!.modified.time = item!.created.time
                 items.remove(item!)
                 items.insert(item!)
-                pack.save(url)
+                pack.save(repository.url)
             } else {
                 item = items.first { $0.path == path }
             }
@@ -74,7 +70,7 @@ final class Index {
             tree.hex(item!.id.hash)
         }
         let pack = Hash.tree(tree)
-        pack.save(url)
+        pack.save(repository.url)
         save(items)
         return pack.id
     }
@@ -107,6 +103,6 @@ final class Index {
             }
         }
         data.append(contentsOf: Hash.sha1(data))
-        try! data.write(to: url.index, options: .atomic)
+        try! data.write(to: repository.url.index, options: .atomic)
     }
 }

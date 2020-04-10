@@ -4,7 +4,7 @@ import XCTest
 final class IgnoreTests: Tests {
     func testGitFolder() {
         let expect = expectation(description: "")
-        git.create(url).sink(receiveCompletion: { _ in }) { _ in
+        git.create(url).sink { _ in
             XCTAssertTrue(File.contents(self.url).isEmpty)
             expect.fulfill()
         }.store(in: &subs)

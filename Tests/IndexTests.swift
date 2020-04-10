@@ -2,17 +2,17 @@ import XCTest
 @testable import Git
 
 final class IndexTests: Tests {
-    private var index: Index!
+    private var repository: Repository!
     
     override func setUp() {
         super.setUp()
-        index = .init(url)
+        repository = .init(url)
         try! FileManager.default.createDirectory(at: url.appendingPathComponent(".git"), withIntermediateDirectories: true)
     }
     
     func testLoad() {
         try! Data(base64Encoded: index0)!.write(to: url.appendingPathComponent(".git/index"))
-        let items = index.items
+        let items = repository.index.items
         XCTAssertEqual(1, items.count)
         XCTAssertEqual("afile.json", items.first?.path)
         XCTAssertEqual("3b18e512dba79e4c8300dd08aeb37f8e728b8dad", items.first?.id.hash)
@@ -29,21 +29,21 @@ final class IndexTests: Tests {
     
     func testLoadBig() {
         try! Data(base64Encoded: index1)!.write(to: url.appendingPathComponent(".git/index"))
-        XCTAssertEqual(22, index.items.count)
+        XCTAssertEqual(22, repository.index.items.count)
     }
     
     func testSave() {
         try! Data(base64Encoded: index1)!.write(to: url.appendingPathComponent(".git/index"))
-        _ = index.save([])
+        _ = repository.index.save([])
         XCTAssertEqual(index1, try? Data(contentsOf: url.appendingPathComponent(".git/index")).base64EncodedString())
     }
     
     func testAdd() {
         let file = url.appendingPathComponent("file.json")
         try! Data("hello world\n".utf8).write(to: file)
-        _ = index.save(["file.json"])
+        _ = repository.index.save(["file.json"])
         XCTAssertTrue(FileManager.default.fileExists(atPath: url.appendingPathComponent(".git/objects/3b/18e512dba79e4c8300dd08aeb37f8e728b8dad").path))
-        let items = index.items
+        let items = repository.index.items
         XCTAssertEqual(1, items.count)
         XCTAssertEqual("3b18e512dba79e4c8300dd08aeb37f8e728b8dad", items.first?.id.hash)
         XCTAssertEqual("file.json", items.first?.path)
@@ -55,12 +55,12 @@ final class IndexTests: Tests {
     func testUpdate() {
         let file = url.appendingPathComponent("file.json")
         try! Data("hello world\n".utf8).write(to: file)
-        _ = index.save(["file.json"])
+        _ = repository.index.save(["file.json"])
         XCTAssertFalse(FileManager.default.fileExists(atPath: url.appendingPathComponent(".git/objects/01/a59b011a48660bb3828ec72b2b08990b8cf56b").path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: url.appendingPathComponent(".git/objects/3b/18e512dba79e4c8300dd08aeb37f8e728b8dad").path))
         try! Data("lorem ipsum\n".utf8).write(to: file)
-        _ = index.save(["file.json"])
-        let items = index.items
+        _ = repository.index.save(["file.json"])
+        let items = repository.index.items
         XCTAssertEqual(1, items.count)
         XCTAssertEqual("01a59b011a48660bb3828ec72b2b08990b8cf56b", items.first?.id.hash)
         XCTAssertEqual("eAFLyslPUjA0YsjJL0rNVcgsKC7N5QIARH4Gmg==",
