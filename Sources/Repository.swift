@@ -44,6 +44,8 @@ public final class Repository {
     }
     
     public func commit(_ paths: [String], message: String) {
-        
+        queue.async {
+            
+        }
     }
 }
