@@ -17,6 +17,7 @@ final class StatusTests: Tests {
                     XCTAssertTrue($0.modified.isEmpty)
                     expect.fulfill()
                 }.store(in: &self.subs)
+                self.repository.status.refresh()
             }
         }.store(in: &subs)
         waitForExpectations(timeout: 1)
@@ -31,6 +32,7 @@ final class StatusTests: Tests {
                 XCTAssertEqual("file.txt", $0.untracked.first)
                 expect.fulfill()
             }.store(in: &self.subs)
+            self.repository.status.refresh()
         }.store(in: &subs)
         waitForExpectations(timeout: 1)
     }
@@ -44,6 +46,7 @@ final class StatusTests: Tests {
                 expect.fulfill()
             }.store(in: &self.subs)
             try! Data("hello world".utf8).write(to: self.url.appendingPathComponent("file.txt"))
+            self.repository.status.refresh()
         }.store(in: &subs)
         waitForExpectations(timeout: 1)
     }
@@ -58,6 +61,7 @@ final class StatusTests: Tests {
                 XCTAssertEqual("file.txt", $0.added.first)
                 expect.fulfill()
             }.store(in: &self.subs)
+            self.repository.status.refresh()
         }.store(in: &subs)
         waitForExpectations(timeout: 1)
     }
