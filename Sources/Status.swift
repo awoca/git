@@ -15,6 +15,7 @@ public final class Status: Publisher, Subscription {
     private var stream: FSEventStreamRef?
     private let index: Index
     private let url: URL
+    private let dispatch = DispatchQueue(label: "", qos: .utility)
     
     init(_ url: URL) {
         index = .init(url)
@@ -28,7 +29,6 @@ public final class Status: Publisher, Subscription {
     public func receive<S>(subscriber: S) where S : Subscriber, Failure == S.Failure, Output == S.Input {
         sub = .init(subscriber)
         subscriber.receive(subscription: self)
-        start()
     }
     
     public func request(_ demand: Subscribers.Demand) { }
@@ -36,6 +36,29 @@ public final class Status: Publisher, Subscription {
     public func cancel() {
         stop()
         sub = nil
+    }
+    
+    public func refresh() {
+        dispatch.async { [weak self] in
+            self?.send()
+        }
+    }
+    
+    public func start() {
+        guard stream == nil else { return }
+        var context = FSEventStreamContext(version: 0, info: Unmanaged.passUnretained(self).toOpaque(), retain: nil, release: nil, copyDescription: nil)
+        stream = FSEventStreamCreate(kCFAllocatorDefault, { _, context, _, _, _, _ in
+            Unmanaged<Status>.fromOpaque(context!).takeUnretainedValue().send()
+        }, &context, [url.path] as CFArray, .init(kFSEventStreamEventIdSinceNow), 0.01, .init(kFSEventStreamCreateFlagNone))
+        FSEventStreamSetDispatchQueue(stream!, dispatch)
+        FSEventStreamStart(stream!)
+    }
+    
+    public func stop() {
+        guard let stream = self.stream else { return }
+        FSEventStreamStop(stream)
+        FSEventStreamInvalidate(stream)
+        FSEventStreamRelease(stream)
     }
     
     private func send() {
@@ -51,23 +74,5 @@ public final class Status: Publisher, Subscription {
         DispatchQueue.main.async { [weak self] in
             _ = self?.sub?.receive(output)
         }
-    }
-    
-    private func start() {
-        guard stream == nil else { return }
-        var context = FSEventStreamContext(version: 0, info: Unmanaged.passUnretained(self).toOpaque(), retain: nil, release: nil, copyDescription: nil)
-        stream = FSEventStreamCreate(kCFAllocatorDefault, { _, context, _, _, _, _ in
-            Unmanaged<Status>.fromOpaque(context!).takeUnretainedValue().send()
-        }, &context, [url.path] as CFArray, .init(kFSEventStreamEventIdSinceNow), 0.01, .init(kFSEventStreamCreateFlagNone))
-        FSEventStreamSetDispatchQueue(stream!, .init(label: "", qos: .utility))
-        FSEventStreamStart(stream!)
-        FSEventStreamFlushAsync(stream!)
-    }
-    
-    private func stop() {
-        guard let stream = self.stream else { return }
-        FSEventStreamStop(stream)
-        FSEventStreamInvalidate(stream)
-        FSEventStreamRelease(stream)
     }
 }
