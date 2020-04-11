@@ -18,7 +18,6 @@ public final class Commit {
     public let author: Author
     public let committer: Author
     public let message: String
-    public let privacy: String
     public private(set) var parent = [String : Commit?]()
     private(set) var tree = [String : Tree?]()
     
@@ -30,8 +29,5 @@ public final class Commit {
         parent = .init(uniqueKeysWithValues: lines.filter { $0.hasPrefix("parent") }.map { (.init($0.suffix(40)), nil) })
         author = .init(lines.first { $0.hasPrefix("author") }!)
         committer = .init(lines.first { $0.hasPrefix("committer") }!)
-        privacy = {
-            $0.count > 1 ? $0.last! : ""
-        } (middle.first!.components(separatedBy: "gpgsig "))
     }
 }

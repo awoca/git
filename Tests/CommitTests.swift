@@ -15,7 +15,6 @@ final class CommitTests: Tests {
         XCTAssertEqual(commit.author, commit.committer)
         XCTAssertEqual("This is my first commit.\n", commit.message)
         XCTAssertTrue(commit.parent.isEmpty)
-        XCTAssertEqual("", commit.privacy)
     }
     
     func testCommit1() {
@@ -41,10 +40,6 @@ final class CommitTests: Tests {
         try! FileManager.default.createDirectory(atPath: file.deletingLastPathComponent().path, withIntermediateDirectories: true)
         try! Data(base64Encoded: commit3)!.write(to: file)
         let commit = Commit(file)
-        XCTAssertEqual("""
------BEGIN PGP SIGNATURE-----\n \n wsBcBAABCAAQBQJc2Q6SCRBK7hj4Ov3rIwAAdHIIAG87iBwa22KVe14mZRay8eNm\n zIBtaLODH51ETcpmjFouPM59Zp1jrVtyuqa3RCj2Ijsrj0VVNfIET9XTd/LfHnvM\n oel2lT69YtWUvu6Dnm7NhyaMvgqhfTytF4W3uXd5FB1aTwyv2cUNq5y+fNzqjYlY\n kxDiyVX2Efg54yyDsO1GbWR20ij3m9lR7GrysX2oS135WatX62w0zmQHoslrbjPT\n zAJaherlmbXG07A6yoRajdp/o+Tujf/irjMVWBwuYy3WI96U+Mj5CuFHgQvVq3om\n sb+wQXR0sq9g1x5v/rC780IsuNzj8hl3eVj6PQMzlTdqUBYwJxCzMMQXPeYQ5z8=\n =GDUq\n -----END PGP SIGNATURE-----\n \
-
-""", commit.privacy)
     }
     
     func testCommit4() {
