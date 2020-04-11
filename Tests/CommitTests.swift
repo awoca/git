@@ -15,24 +15,41 @@ final class CommitTests: Tests {
         XCTAssertEqual(commit.author, commit.committer)
         XCTAssertEqual("This is my first commit.\n", commit.message)
         XCTAssertTrue(commit.parent.isEmpty)
-        XCTAssertTrue(commit.privacy.isEmpty)
+        XCTAssertEqual("", commit.privacy)
     }
-    /*
+    
     func testCommit1() {
         let file = url.appendingPathComponent(".git/objects/72/0f2f1fbe2010e9c4e9ab02e9bd83ad6842d7f0")
+        try! FileManager.default.createDirectory(atPath: file.deletingLastPathComponent().path, withIntermediateDirectories: true)
+        try! Data(base64Encoded: commit1)!.write(to: file)
+        let commit = Commit(file)
+        XCTAssertEqual("0cbd117f7fe2ec884168863af047e8c89e71aaf1", commit.parent.keys.first)
+        XCTAssertEqual("My second commit.\n", commit.message)
     }
     
     func testCommit2() {
         let file = url.appendingPathComponent(".git/objects/79/be52211d61ef2e59134ae6e8aaa0fe121de71f")
+        try! FileManager.default.createDirectory(atPath: file.deletingLastPathComponent().path, withIntermediateDirectories: true)
+        try! Data(base64Encoded: commit2)!.write(to: file)
+        let commit = Commit(file)
+        XCTAssertTrue(commit.parent.keys.contains("890be9af6d5a18a1eb999f0ad44c15a83f227af4"))
+        XCTAssertTrue(commit.parent.keys.contains("d27de8c22fb0cfdc7d12f8eaf30bcc5343e7f70a"))
     }
     
     func testCommit3() {
         let file = url.appendingPathComponent(".git/objects/d2/7de8c22fb0cfdc7d12f8eaf30bcc5343e7f70a")
+        try! FileManager.default.createDirectory(atPath: file.deletingLastPathComponent().path, withIntermediateDirectories: true)
+        try! Data(base64Encoded: commit3)!.write(to: file)
+        let commit = Commit(file)
+        XCTAssertEqual("""
+-----BEGIN PGP SIGNATURE-----\n \n wsBcBAABCAAQBQJc2Q6SCRBK7hj4Ov3rIwAAdHIIAG87iBwa22KVe14mZRay8eNm\n zIBtaLODH51ETcpmjFouPM59Zp1jrVtyuqa3RCj2Ijsrj0VVNfIET9XTd/LfHnvM\n oel2lT69YtWUvu6Dnm7NhyaMvgqhfTytF4W3uXd5FB1aTwyv2cUNq5y+fNzqjYlY\n kxDiyVX2Efg54yyDsO1GbWR20ij3m9lR7GrysX2oS135WatX62w0zmQHoslrbjPT\n zAJaherlmbXG07A6yoRajdp/o+Tujf/irjMVWBwuYy3WI96U+Mj5CuFHgQvVq3om\n sb+wQXR0sq9g1x5v/rC780IsuNzj8hl3eVj6PQMzlTdqUBYwJxCzMMQXPeYQ5z8=\n =GDUq\n -----END PGP SIGNATURE-----\n \
+
+""", commit.privacy)
     }
     
     func testCommit4() {
         let file = url.appendingPathComponent(".git/objects/15/788bb7a6220d3386ac0bbf52709e93bc3415ac")
-    }*/
+    }
 }
 
 private let commit0 = """

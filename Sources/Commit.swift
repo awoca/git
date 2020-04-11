@@ -27,9 +27,11 @@ public final class Commit {
         let lines = middle.first!.components(separatedBy: "\n")
         message = middle.dropFirst().joined(separator: "\n\n")
         tree.updateValue(nil, forKey: .init(lines.first!.suffix(40)))
-        parent = .init(uniqueKeysWithValues: lines.filter { $0.hasPrefix("parent") }.map { ($0, nil) })
+        parent = .init(uniqueKeysWithValues: lines.filter { $0.hasPrefix("parent") }.map { (.init($0.suffix(40)), nil) })
         author = .init(lines.first { $0.hasPrefix("author") }!)
         committer = .init(lines.first { $0.hasPrefix("committer") }!)
-        privacy = ""
+        privacy = {
+            $0.count > 1 ? $0.last! : ""
+        } (middle.first!.components(separatedBy: "gpgsig "))
     }
 }
