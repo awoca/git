@@ -14,6 +14,10 @@ final class Hash {
         .init("tree", data: data)
     }
     
+    class func commit(_ string: String) -> Pack {
+        .init("commit", data: .init(string.utf8))
+    }
+    
     class func object(_ url: URL) -> Data {
         try! (Data(url).advanced(by: 2) as NSData).decompressed(using: .zlib) as Data
     }
