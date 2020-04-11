@@ -10,7 +10,6 @@ final class CommitTests: Tests {
         XCTAssertEqual("99ff9f93b7f0f7d300dc3c42d16cdfcdf5c2a82f", commit.tree.keys.first)
         XCTAssertEqual("vauxhall", commit.author.name)
         XCTAssertEqual("zero.griffin@gmail.com", commit.author.email)
-        XCTAssertEqual("+0200", commit.author.timezone)
         XCTAssertEqual(1554638195, commit.author.date)
         XCTAssertEqual(commit.author, commit.committer)
         XCTAssertEqual("This is my first commit.\n", commit.message)

@@ -4,13 +4,11 @@ public final class Commit {
     public struct Author: Equatable {
         public let name: String
         public let email: String
-        public let timezone: String
         public let date: Int
         
         fileprivate init(_ string: String) {
             name = string.components(separatedBy: " <").first!.components(separatedBy: " ").dropFirst().joined(separator: " ")
             email = string.components(separatedBy: "<").last!.components(separatedBy: ">").first!
-            timezone = string.components(separatedBy: " ").last!
             date = Int(string.components(separatedBy: "> ").last!.components(separatedBy: " ").first!)!
         }
     }
