@@ -28,7 +28,7 @@ final class CreateTests: Tests {
             XCTAssertTrue(FileManager.default.fileExists(atPath: objects.path, isDirectory: &dir))
             XCTAssertTrue(dir.boolValue)
             
-            repository.branch.sink {
+            repository.branch.name.sink {
                 XCTAssertEqual("master", $0)
                 expect.fulfill()
             }.store(in: &self.subs)

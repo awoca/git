@@ -2,6 +2,8 @@ import Foundation
 import Combine
 
 public final class Git {
+    public static var credentials = Credentials()
+    
     public init() { }
     
     public func open(_ url: URL) -> Future<Repository?, Never> {
@@ -28,7 +30,7 @@ public final class Git {
                 File.create(url.git)
                 File.create(url.refs)
                 File.create(url.objects)
-                repository.branch("master")
+                repository.branch.change("master")
                 DispatchQueue.main.async {
                     promise(.success(repository))
                 }
