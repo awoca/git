@@ -1,21 +1,34 @@
 import XCTest
-import Git
+@testable import Git
 
 final class CommitTests: Tests {
     func testCommit0() {
-        
-        
-        
-        XCTAssertNil(commit?.parent.first)
-        XCTAssertEqual("99ff9f93b7f0f7d300dc3c42d16cdfcdf5c2a82f", commit?.tree)
-        XCTAssertEqual("vauxhall", commit?.author.name)
-        XCTAssertEqual("zero.griffin@gmail.com", commit?.author.email)
-        XCTAssertEqual("vauxhall", commit?.committer.name)
-        XCTAssertEqual("zero.griffin@gmail.com", commit?.committer.email)
-        XCTAssertEqual(Date(timeIntervalSince1970: 1554638195), commit?.author.date)
-        XCTAssertEqual(Date(timeIntervalSince1970: 1554638195), commit?.committer.date)
-        XCTAssertEqual("This is my first commit.\n", commit?.message)
-        XCTAssertEqual("", commit?.gpg)
+        let file = url.appendingPathComponent(".git/objects/0c/bd117f7fe2ec884168863af047e8c89e71aaf1")
+        try! FileManager.default.createDirectory(atPath: file.deletingLastPathComponent().path, withIntermediateDirectories: true)
+        try! Data(base64Encoded: commit0)!.write(to: file)
+        let commit = Commit(url, id: .init("0cbd117f7fe2ec884168863af047e8c89e71aaf1"))
+        XCTAssertEqual("99ff9f93b7f0f7d300dc3c42d16cdfcdf5c2a82f", commit.tree.keys.first)
+        XCTAssertEqual(.init(name: "vauxhall", email: "zero.griffin@gmail.com", date: 1554638195), commit.author)
+        XCTAssertEqual(commit.author, commit.commiter)
+        XCTAssertEqual("This is my first commit.\n", commit.message)
+        XCTAssertTrue(commit.parent.isEmpty)
+        XCTAssertTrue(commit.privacy.isEmpty)
+    }
+    
+    func testCommit1() {
+        let file = url.appendingPathComponent(".git/objects/72/0f2f1fbe2010e9c4e9ab02e9bd83ad6842d7f0")
+    }
+    
+    func testCommit2() {
+        let file = url.appendingPathComponent(".git/objects/79/be52211d61ef2e59134ae6e8aaa0fe121de71f")
+    }
+    
+    func testCommit3() {
+        let file = url.appendingPathComponent(".git/objects/d2/7de8c22fb0cfdc7d12f8eaf30bcc5343e7f70a")
+    }
+    
+    func testCommit4() {
+        let file = url.appendingPathComponent(".git/objects/15/788bb7a6220d3386ac0bbf52709e93bc3415ac")
     }
 }
 
