@@ -39,10 +39,24 @@ final class CommitTests: Tests {
         try! FileManager.default.createDirectory(atPath: file.deletingLastPathComponent().path, withIntermediateDirectories: true)
         try! Data(base64Encoded: commit3)!.write(to: file)
         let commit = Commit(file)
+        XCTAssertEqual("GitHub", commit.committer.name)
+        XCTAssertEqual("noreply@github.com", commit.committer.email)
     }
     
     func testCommit4() {
         let file = url.appendingPathComponent(".git/objects/15/788bb7a6220d3386ac0bbf52709e93bc3415ac")
+        try! FileManager.default.createDirectory(atPath: file.deletingLastPathComponent().path, withIntermediateDirectories: true)
+        try! Data(base64Encoded: commit4)!.write(to: file)
+        XCTAssertEqual("""
+Add Swift Package Manager support (close #474)
+
+PR: #498 , #495 \r
+\r
+* Add Swift Package Manager support\r
+* Add Swift Package Manager build check\r
+\r
+Co-authored-by: vauxhall <zero.griffin@gmail.com>
+""", Commit(file).message)
     }
 }
 
