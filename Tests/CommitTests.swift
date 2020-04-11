@@ -8,11 +8,14 @@ final class CommitTests: Tests {
         try! Data(base64Encoded: commit0)!.write(to: file)
         let commit = Commit(file)
         XCTAssertEqual("99ff9f93b7f0f7d300dc3c42d16cdfcdf5c2a82f", commit.tree.keys.first)
-//        XCTAssertEqual(.init(name: "vauxhall", email: "zero.griffin@gmail.com", date: 1554638195), commit.author)
-//        XCTAssertEqual(commit.author, commit.commiter)
+        XCTAssertEqual("vauxhall", commit.author.name)
+        XCTAssertEqual("zero.griffin@gmail.com", commit.author.email)
+        XCTAssertEqual("+0200", commit.author.timezone)
+        XCTAssertEqual(1554638195, commit.author.date)
+        XCTAssertEqual(commit.author, commit.committer)
         XCTAssertEqual("This is my first commit.\n", commit.message)
         XCTAssertTrue(commit.parent.isEmpty)
-//        XCTAssertTrue(commit.privacy.isEmpty)
+        XCTAssertTrue(commit.privacy.isEmpty)
     }
     /*
     func testCommit1() {
