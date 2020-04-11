@@ -7,11 +7,15 @@ final class Hash {
     }
     
     class func file(_ url: URL) -> Pack {
-        blob(try! .init(contentsOf: url))
+        blob(.init(url))
     }
     
     class func tree(_ data: Data) -> Pack {
         .init("tree", data: data)
+    }
+    
+    class func object(_ url: URL) -> Data {
+        try! (Data(url).advanced(by: 2) as NSData).decompressed(using: .zlib) as Data
     }
     
     private class func blob(_ data: Data) -> Pack {
@@ -32,7 +36,7 @@ final class Hash {
         }
         
         func save(_ url: URL) {
-            let location = url.objects.appendingPathComponent(id.head).appendingPathComponent(id.tail)
+            let location = url.object(id)
             guard !location.exists else { return }
             File.create(location.deletingLastPathComponent())
             try! (header + ((object as NSData).compressed(using: .zlib)) + adler32).write(to: location, options: .atomic)

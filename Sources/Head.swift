@@ -5,7 +5,7 @@ final class Head {
     private let prefix = "ref: refs/heads/"
 
     var branch: String {
-        String(decoding: try! Data(contentsOf: repository.url.HEAD), as: UTF8.self).dropFirst(prefix.count).trimmingCharacters(in: .whitespacesAndNewlines)
+        String(decoding: Data(repository.url.HEAD), as: UTF8.self).dropFirst(prefix.count).trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
     func branch(_ name: String) {

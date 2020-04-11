@@ -6,6 +6,10 @@ extension Data {
         self.init(bytes: &bytes, count: MemoryLayout<T>.size)
     }
     
+    init(_ url: URL) {
+        try! self.init(contentsOf: url)
+    }
+    
     mutating func uInt32() -> UInt32 {
         UInt32(hex(4), radix: 16)!
     }

@@ -8,4 +8,8 @@ extension URL {
     var HEAD: URL { git.appendingPathComponent("/HEAD") }
     var index: URL { git.appendingPathComponent("/index") }
     var exists: Bool { File.exists(self) }
+    
+    func object(_ id: Id) -> URL {
+        objects.appendingPathComponent(id.head).appendingPathComponent(id.tail)
+    }
 }
