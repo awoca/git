@@ -1,8 +1,14 @@
 import XCTest
-import Git
+@testable import Git
 
 final class LogTests: Tests {
     var repository: Repository!
+    
+    override func setUp() {
+        super.setUp()
+        Git.credentials.name = "Cez Berenjena"
+        Git.credentials.email = "cez@berenjena.com"
+    }
     
     func testNoCommits() {
         let expect = expectation(description: "")
@@ -27,6 +33,8 @@ final class LogTests: Tests {
             self.repository.log.commit(["file.txt"], message: "first commit")
             self.repository.log.history.sink {
                 XCTAssertEqual("first commit", $0?.message)
+                XCTAssertEqual("file.txt", self.repository.index.items.first?.path)
+                XCTAssertNil($0?.parent)
                 expect.fulfill()
             }.store(in: &self.subs)
         }.store(in: &subs)
