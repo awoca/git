@@ -5,13 +5,16 @@ public final class Branch {
     weak var repository: Repository!
     private let prefix = "ref: refs/heads/"
     
+    private var branch: String {
+        String(decoding: Data(repository.url.HEAD), as: UTF8.self).dropFirst(prefix.count).trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+    
     public var name: Future<String, Never> {
         .init { [weak self] promise in
             self?.repository.queue.async {
-                guard let self = self else { return }
-                let name = String(decoding: Data(self.repository.url.HEAD), as: UTF8.self).dropFirst(self.prefix.count).trimmingCharacters(in: .whitespacesAndNewlines)
+                guard let branch = self?.branch else { return }
                 DispatchQueue.main.async {
-                    promise(.success(name))
+                    promise(.success(branch))
                 }
             }
         }
@@ -22,5 +25,10 @@ public final class Branch {
             guard let self = self else { return }
             try! Data((self.prefix + to).utf8).write(to: self.repository.url.HEAD, options: .atomic)
         }
+    }
+    
+    func commit(_ id: Id) {
+        File.create(repository.url.heads)
+        try! Data(id.hash.utf8).write(to: repository.url.heads.appendingPathComponent(branch), options: .atomic)
     }
 }

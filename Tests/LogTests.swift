@@ -34,6 +34,7 @@ final class LogTests: Tests {
             self.repository.log.history.sink {
                 XCTAssertEqual("first commit", $0?.message)
                 XCTAssertEqual("file.txt", self.repository.index.items.first?.path)
+                XCTAssertEqual(40, (try? String(decoding: Data(contentsOf: self.url.appendingPathComponent(".git/refs/heads/master")), as: UTF8.self))?.count)
                 XCTAssertNil($0?.parent)
                 expect.fulfill()
             }.store(in: &self.subs)

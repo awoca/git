@@ -24,10 +24,12 @@ public final class Log {
             guard let self = self else { return }
             let author = Git.credentials.name +  " <" + Git.credentials.email +  "> \(Int(Date().timeIntervalSince1970)) " + self.timezone.string(from: .init())
             var serial = "tree " + self.repository.index.save(paths).hash
-            serial += "\nauthor " + author
-            serial += "\ncommitter " + author
-            serial += "\n\n" + message
+//            serial += "\nauthor " + author
+//            serial += "\ncommitter " + author
+//            serial += "\n\n" + message
             let pack = Hash.commit(serial)
+            pack.save(self.repository.url)
+            self.repository.branch.commit(pack.id)
         }
     }
 }
