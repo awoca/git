@@ -12,8 +12,12 @@ public final class Log {
     public var history: Future<Commit?, Never> {
         .init { [weak self] promise in
             self?.repository.queue.async {
+                guard let self = self else { return }
+                let commit = {
+                    $0 == nil ? nil : Commit(self.repository.url, id: $0!)
+                } (self.repository.branch.commit)
                 DispatchQueue.main.async {
-                    promise(.success(nil))
+                    promise(.success(commit))
                 }
             }
         }
@@ -22,12 +26,13 @@ public final class Log {
     public func commit(_ paths: Set<String>, message: String) {
         repository.queue.async { [weak self] in
             guard let self = self else { return }
-            let author = Git.credentials.name +  " <" + Git.credentials.email +  "> \(Int(Date().timeIntervalSince1970)) " + self.timezone.string(from: .init())
-            var serial = "tree " + self.repository.index.save(paths).hash
-//            serial += "\nauthor " + author
-//            serial += "\ncommitter " + author
-//            serial += "\n\n" + message
-            let pack = Hash.commit(serial)
+            let date = Date()
+            let author = Git.credentials.name +  " <" + Git.credentials.email +  "> \(Int(date.timeIntervalSince1970)) " + self.timezone.string(from: date)
+            var commit = "tree " + self.repository.index.save(paths).hash
+            commit += "\nauthor " + author
+            commit += "\ncommitter " + author
+            commit += "\n\n" + message
+            let pack = Hash.commit(commit)
             pack.save(self.repository.url)
             self.repository.branch.commit(pack.id)
         }

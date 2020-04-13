@@ -13,8 +13,13 @@ final class Index {
         var created = Timestamp()
         var modified = Timestamp()
         
-        func hash(into: inout Hasher) { into.combine(path) }
-        static func == (lhs: Self, rhs: Self) -> Bool { lhs.path == rhs.path }
+        func hash(into: inout Hasher) {
+            into.combine(path)
+        }
+        
+        static func == (lhs: Self, rhs: Self) -> Bool {
+            lhs.path == rhs.path
+        }
     }
     
     struct Timestamp {

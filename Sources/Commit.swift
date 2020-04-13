@@ -1,6 +1,6 @@
 import Foundation
 
-public final class Commit {
+public final class Commit: Hashable {
     public struct Author: Equatable {
         public let name: String
         public let email: String
@@ -16,16 +16,30 @@ public final class Commit {
     public let author: Author
     public let committer: Author
     public let message: String
-    public private(set) var parent = [String : Commit?]()
-    private(set) var tree = [String : Tree?]()
+    public let parent: Set<Commit>
+    let id: Id
+    let tree: String
     
-    init(_ url: URL) {
-        let middle = String(decoding: Hash.object(url), as: UTF8.self).components(separatedBy: "\n\n")
-        let lines = middle.first!.components(separatedBy: "\n")
-        message = middle.dropFirst().joined(separator: "\n\n")
-        tree.updateValue(nil, forKey: .init(lines.first!.suffix(40)))
-        parent = .init(uniqueKeysWithValues: lines.filter { $0.hasPrefix("parent") }.map { (.init($0.suffix(40)), nil) })
+    init(_ url: URL, id: Id) {
+        let sections = String(decoding: Hash.object(url.object(id)), as: UTF8.self).components(separatedBy: "\n\n")
+        let lines = sections.first!.components(separatedBy: "\n")
+        self.id = id
+        tree = .init(lines.first!.suffix(40))
         author = .init(lines.first { $0.hasPrefix("author") }!)
         committer = .init(lines.first { $0.hasPrefix("committer") }!)
+        message = sections.dropFirst().joined(separator: "\n\n")
+        parent = lines.filter { $0.hasPrefix("parent") }.reduce(into: []) {
+            let id = Id(.init($1.suffix(40)))
+            guard url.object(id).exists else { return }
+            $0.insert(.init(url, id: id))
+        }
+    }
+    
+    public func hash(into: inout Hasher) {
+        into.combine(id)
+    }
+    
+    public static func == (lhs: Commit, rhs: Commit) -> Bool {
+        lhs.id == rhs.id
     }
 }

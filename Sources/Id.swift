@@ -8,4 +8,12 @@ struct Id: Hashable {
     init(_ hash: String) {
         self.hash = hash
     }
+    
+    func hash(into: inout Hasher) {
+        into.combine(hash)
+    }
+    
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.hash == rhs.hash
+    }
 }
