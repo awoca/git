@@ -49,4 +49,22 @@ final class LogTests: Tests {
         }.store(in: &subs)
         waitForExpectations(timeout: 1)
     }
+    
+    func testSecondCommit() {
+        try! Data("hello world".utf8).write(to: url.appendingPathComponent("file.txt"))
+        try! Data("lorem ipsum".utf8).write(to: url.appendingPathComponent("another.txt"))
+        let expect = expectation(description: "")
+        git.create(url).sink {
+            self.repository = $0
+            self.repository.log.commit(["file.txt"], message: "first commit")
+            self.repository.log.commit(["another.txt"], message: "second commit")
+            self.repository.log.history.sink {
+                XCTAssertEqual("first commit", $0?.parent.first?.message)
+                XCTAssertEqual("second commit", $0?.message)
+                XCTAssertEqual("313b11209e780998414abc1de1292143a1a45b5c", $0?.tree)
+                expect.fulfill()
+            }.store(in: &self.subs)
+        }.store(in: &subs)
+        waitForExpectations(timeout: 1)
+    }
 }

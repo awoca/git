@@ -13,9 +13,7 @@ public final class Log {
         .init { [weak self] promise in
             self?.repository.queue.async {
                 guard let self = self else { return }
-                let commit = {
-                    $0 == nil ? nil : Commit(self.repository.url, id: $0!)
-                } (self.repository.branch.commit)
+                let commit = self.repository.branch.commit.map { Commit(self.repository.url, id: $0) }
                 DispatchQueue.main.async {
                     promise(.success(commit))
                 }
@@ -27,8 +25,9 @@ public final class Log {
         repository.queue.async { [weak self] in
             guard let self = self else { return }
             let date = Date()
-            let author = Git.credentials.name +  " <" + Git.credentials.email +  "> \(Int(date.timeIntervalSince1970)) " + self.timezone.string(from: date)
+            let author = Git.credentials.name + " <" + Git.credentials.email + "> \(Int(date.timeIntervalSince1970)) " + self.timezone.string(from: date)
             var commit = "tree " + self.repository.index.save(paths).hash
+            self.repository.branch.commit.map { commit += "\nparent " + $0.hash }
             commit += "\nauthor " + author
             commit += "\ncommitter " + author
             commit += "\n\n" + message
