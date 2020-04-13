@@ -29,9 +29,7 @@ public final class Commit: Hashable {
         committer = .init(lines.first { $0.hasPrefix("committer") }!)
         message = sections.dropFirst().joined(separator: "\n\n")
         parent = lines.filter { $0.hasPrefix("parent") }.reduce(into: []) {
-            let id = Id(.init($1.suffix(40)))
-            guard url.object(id).exists else { return }
-            $0.insert(.init(url, id: id))
+            $0.insert(.init(url, id: .init(.init($1.suffix(40)))))
         }
     }
     

@@ -20,6 +20,7 @@ final class CommitTests: Tests {
         let file = url.appendingPathComponent(".git/objects/72/0f2f1fbe2010e9c4e9ab02e9bd83ad6842d7f0")
         try! FileManager.default.createDirectory(atPath: file.deletingLastPathComponent().path, withIntermediateDirectories: true)
         try! Data(base64Encoded: commit1)!.write(to: file)
+        mock(url.appendingPathComponent(".git/objects/0c/bd117f7fe2ec884168863af047e8c89e71aaf1"))
         let commit = Commit(url, id: .init("720f2f1fbe2010e9c4e9ab02e9bd83ad6842d7f0"))
         XCTAssertEqual("0cbd117f7fe2ec884168863af047e8c89e71aaf1", commit.parent.first?.id.hash)
         XCTAssertEqual("My second commit.\n", commit.message)
@@ -29,6 +30,8 @@ final class CommitTests: Tests {
         let file = url.appendingPathComponent(".git/objects/79/be52211d61ef2e59134ae6e8aaa0fe121de71f")
         try! FileManager.default.createDirectory(atPath: file.deletingLastPathComponent().path, withIntermediateDirectories: true)
         try! Data(base64Encoded: commit2)!.write(to: file)
+        mock(url.appendingPathComponent(".git/objects/89/0be9af6d5a18a1eb999f0ad44c15a83f227af4"))
+        mock(url.appendingPathComponent(".git/objects/d2/7de8c22fb0cfdc7d12f8eaf30bcc5343e7f70a"))
         let commit = Commit(url, id: .init("79be52211d61ef2e59134ae6e8aaa0fe121de71f"))
         XCTAssertTrue(commit.parent.contains { $0.id.hash == "890be9af6d5a18a1eb999f0ad44c15a83f227af4" })
         XCTAssertTrue(commit.parent.contains { $0.id.hash == "d27de8c22fb0cfdc7d12f8eaf30bcc5343e7f70a" })
@@ -38,6 +41,7 @@ final class CommitTests: Tests {
         let file = url.appendingPathComponent(".git/objects/d2/7de8c22fb0cfdc7d12f8eaf30bcc5343e7f70a")
         try! FileManager.default.createDirectory(atPath: file.deletingLastPathComponent().path, withIntermediateDirectories: true)
         try! Data(base64Encoded: commit3)!.write(to: file)
+        mock(url.appendingPathComponent(".git/objects/8d/c0abf0a0b0d70a0a8680daa69a7df74acfce95"))
         let commit = Commit(url, id: .init("d27de8c22fb0cfdc7d12f8eaf30bcc5343e7f70a"))
         XCTAssertEqual("GitHub", commit.committer.name)
         XCTAssertEqual("noreply@github.com", commit.committer.email)
@@ -47,6 +51,7 @@ final class CommitTests: Tests {
         let file = url.appendingPathComponent(".git/objects/15/788bb7a6220d3386ac0bbf52709e93bc3415ac")
         try! FileManager.default.createDirectory(atPath: file.deletingLastPathComponent().path, withIntermediateDirectories: true)
         try! Data(base64Encoded: commit4)!.write(to: file)
+        mock(url.appendingPathComponent(".git/objects/4c/f63fa1c1f38fa17aba6ba2cfdc66e2d4483220"))
         XCTAssertEqual("""
 Add Swift Package Manager support (close #474)
 
@@ -57,6 +62,15 @@ PR: #498 , #495 \r
 \r
 Co-authored-by: vauxhall <zero.griffin@gmail.com>
 """, Commit(url, id: .init("15788bb7a6220d3386ac0bbf52709e93bc3415ac")).message)
+    }
+    
+    private func mock(_ url: URL) {
+        var commit = "tree 15788bb7a6220d3386ac0bbf52709e93bc3415ac"
+        commit += "\nauthor test <test@mail.com> 0 0"
+        commit += "\ncommitter  test <test@mail.com> 0 0"
+        commit += "\n\ntest"
+        File.create(url.deletingLastPathComponent())
+        try! (Data([0x78, 0x1]) + ((Data(commit.utf8) as NSData).compressed(using: .zlib) as Data) + Data([0x78, 0x1, 0x78, 0x1])).write(to: url, options: .atomic)
     }
 }
 
