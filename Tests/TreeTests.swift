@@ -44,4 +44,16 @@ final class TreeTests: Tests {
         }.store(in: &subs)
         waitForExpectations(timeout: 1)
     }
+    
+    func testNewRepositoryThreeFiles() {
+        let expect = expectation(description: "")
+        try! Data("hello world".utf8).write(to: url.appendingPathComponent("file.txt"))
+        try! Data("lorem ipsum".utf8).write(to: url.appendingPathComponent("another.txt"))
+        try! Data("ipsum lorem".utf8).write(to: url.appendingPathComponent("Because.txt"))
+        git.create(url).sink {
+            XCTAssertEqual("9968a2f6b9551723fa8a0b7296b6185f709fab1a", $0.index.save(["file.txt", "another.txt", "Because.txt"]).hash)
+            expect.fulfill()
+        }.store(in: &subs)
+        waitForExpectations(timeout: 1)
+    }
 }

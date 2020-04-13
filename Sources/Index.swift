@@ -53,7 +53,7 @@ final class Index {
     func save(_ adding: Set<String>) -> Id {
         var items = self.items
         var tree = Data()
-        File.contents(repository.url).forEach { path in
+        File.contents(repository.url).sorted().forEach { path in
             var item: Item?
             if adding.contains(path) {
                 let pack = Hash.file(repository.url.appendingPathComponent(path))
